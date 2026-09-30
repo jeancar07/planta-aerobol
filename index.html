@@ -312,6 +312,11 @@ tbody tr:hover td:first-child{padding-left:14px}
 #histChart rect[data-dia]:hover{transform:scaleY(1.04);opacity:.85}
 
 @media (prefers-reduced-motion:reduce){.kpi:hover,.mach:hover,.btn:hover{transform:none!important}.bgfx{display:none}}
+.shift{display:inline-flex;align-items:center;gap:8px}
+.livedot{width:8px;height:8px;border-radius:50%;background:var(--ok);flex:none;animation:livedot 1.6s ease-out infinite}
+@keyframes livedot{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--ok) 60%,transparent)}70%,100%{box-shadow:0 0 0 8px transparent}}
+@media (prefers-reduced-motion:reduce){.livedot{animation:none}}
+.manual{display:inline-block;margin-left:6px;font-size:.68rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:3px;padding:1px 6px}
 .login{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:24px 16px;transition:opacity .45s,transform .45s}
 .login.out{opacity:0;transform:scale(1.03);pointer-events:none}
 .lcard{width:min(380px,100%);display:flex;flex-direction:column;gap:14px;padding:28px 24px;border-radius:10px;border:1px solid var(--line);
@@ -328,6 +333,7 @@ tbody tr:hover td:first-child{padding-left:14px}
 .lerr:empty{display:none}
 .lerr.shake{animation:shake .45s}
 @keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.lbrand{margin-bottom:10px}
 </style>
 </head>
 <body>
@@ -350,7 +356,6 @@ tbody tr:hover td:first-child{padding-left:14px}
     <circle cx="108" cy="26.5" r="1.9" style="--d:2.1s;--y:-5px"/><circle cx="108" cy="26.5" r="1.2" style="--d:2.45s;--y:10px"/>
   </g>
 </svg><div class="word"><b>AERO<span>BOL</span></b><em>SAS</em></div></div>
-    <p class="lsub">Planta · Espuma Torito 1000</p>
     <div class="lfield"><label for="lUser">Usuario</label><input id="lUser" autocomplete="username" autocapitalize="none" spellcheck="false" required></div>
     <div class="lfield"><label for="lPass">Contraseña</label><input id="lPass" type="password" autocomplete="current-password" required><button type="button" class="eye" id="lEye">Ver</button></div>
     <p class="lerr" id="lErr" role="alert"></p>
@@ -375,7 +380,7 @@ tbody tr:hover td:first-child{padding-left:14px}
     <circle cx="108" cy="26.5" r="2.6" style="--d:1.4s;--y:-10px"/><circle cx="108" cy="26.5" r="1.5" style="--d:1.75s;--y:2px"/>
     <circle cx="108" cy="26.5" r="1.9" style="--d:2.1s;--y:-5px"/><circle cx="108" cy="26.5" r="1.2" style="--d:2.45s;--y:10px"/>
   </g>
-</svg><div class="word"><b>AERO<span>BOL</span></b><em>SAS</em></div><small>Planta · Espuma Torito 1000</small><span class="live"><i></i>En vivo</span></div>
+</svg><div class="word"><b>AERO<span>BOL</span></b><em>SAS</em></div></div>
     <span class="shift" id="shift">—</span>
     <span class="clock num" id="clock">--:--</span>
     <div class="controls">
@@ -540,8 +545,9 @@ function render(){
   document.documentElement.classList.toggle('tv', mode==='tv');
   $('mTablet').setAttribute('aria-pressed', mode==='tablet');
   $('mTv').setAttribute('aria-pressed', mode==='tv');
-  $('layout').classList.toggle('with-panel', mode==='tablet' && S.canWrite && R.isToday);
-  $('panel').hidden = !(mode==='tablet' && S.canWrite && R.isToday && S.fb);
+  const editable = R.isToday || S.viewKey < S.todayKey;
+  $('layout').classList.toggle('with-panel', mode==='tablet' && S.canWrite && editable);
+  $('panel').hidden = !(mode==='tablet' && S.canWrite && editable && S.fb);
   $('mTablet').parentElement.hidden = S.rol!=='admin';
   foam.tint = document.documentElement.classList.contains('tv') || matchMedia('(prefers-color-scheme: dark)').matches ? 'light' : 'dark';
   foam.confettiRate = 0;
@@ -549,13 +555,15 @@ function render(){
 
   $('clock').textContent = hhmm(R.now.min);
   const sh = $('shift'); const nm = R.now.min;
-  if(nm>=T_INI && nm<ALM_I || nm>=ALM_F && nm<T_FIN){ sh.textContent='Turno en curso'; sh.className='shift on'; }
+  if(nm>=T_INI && nm<ALM_I || nm>=ALM_F && nm<T_FIN){ sh.innerHTML='<i class="livedot"></i>Turno en curso'; sh.className='shift on'; }
   else if(nm>=ALM_I && nm<ALM_F){ sh.textContent='Almuerzo'; sh.className='shift lunch'; }
   else { sh.textContent='Fuera de turno'; sh.className='shift'; }
 
   const b = $('banner');
   if(S.dbState==='sin-db'){ b.hidden=false; b.className='banner bad'; b.textContent='No hay conexión con la base de datos. Revisa internet; la página se reconecta sola.'; }
-  else if(!R.isToday){ b.hidden=false; b.className='banner'; b.innerHTML=`Estás viendo el <b>${esc(fmtFecha(S.viewKey))}</b>. Los registros solo se hacen sobre el día de hoy. <button class="btn" id="volverHoy" style="margin-left:8px">Volver a hoy</button>`; $('volverHoy').onclick=()=>abrirDia(S.todayKey); }
+  else if(!R.isToday){ b.hidden=false; b.className='banner';
+    const puede = S.canWrite && S.viewKey < S.todayKey;
+    b.innerHTML=`Estás viendo el <b>${esc(fmtFecha(S.viewKey))}</b>. ${puede ? (mode==='tablet' ? 'Puedes cargar lo que se produjo ese día en el panel de la izquierda.' : 'Para cargar lo que se produjo ese día, cambia a <b>Registro</b>.') : ''} <button class="btn" id="volverHoy" style="margin-left:8px">Volver a hoy</button>`; $('volverHoy').onclick=()=>abrirDia(S.todayKey); }
   else b.hidden=true;
 
   renderKpis(R); renderMachines(R); renderChart(R); renderMaterials(R); renderLog(R); renderHist();
@@ -598,7 +606,7 @@ function renderMachines(R){
   $('machAside').textContent = down ? `${down} detenida${down>1?'s':''}` : '';
   $('machines').innerHTML = R.M.map(m=>{
     const st = m.down ? 'bad' : (m.und>0 ? 'ok' : '');
-    const pill = m.down ? '<span class="pill bad blink">Detenida · falla</span>' : m.und>0 ? '<span class="pill ok">Produciendo</span>' : '<span class="pill">Sin reportes</span>';
+    const pill = m.down ? '<span class="pill bad blink">Detenida · falla</span>' : m.und>0 ? (R.isToday ? '<span class="pill ok">Produciendo</span>' : '<span class="pill">Día cerrado</span>') : '<span class="pill">Sin reportes</span>';
     return `<article class="mach ${st}" data-mid="${esc(m.id)}">
       <div class="head"><span class="name">${esc(m.nombre)}</span>${pill}</div>
       <div class="big num">${cnt('m_'+m.id,m.und)}<small>und · ${nf0.format(Math.floor(m.und/UXC))} cajas</small></div>
@@ -608,7 +616,7 @@ function renderMachines(R){
         <dt>Ritmo</dt><dd>${m.rate?nf0.format(m.rate*60)+' und/h':'—'}</dd>
         <dt>Tiempo detenida</dt><dd>${m.downMin>0?nf0.format(m.downMin)+' min':'0 min'}${m.fallas?` · ${m.fallas} falla${m.fallas>1?'s':''}`:''}</dd>
       </dl>
-      ${!m.down && m.und>0 ? `<div class="belt" style="animation-delay:-${(Date.now()%900)/1000}s"></div>` : ''}
+      ${R.isToday && !m.down && m.und>0 ? `<div class="belt" style="animation-delay:-${(Date.now()%900)/1000}s"></div>` : ''}
     </article>`;
   }).join('');
   runCounters($('machines'));
@@ -760,7 +768,7 @@ document.addEventListener('pointermove', e=>{
 // fondo dinámico: malla de puntos en onda que se aparta del cursor + luces suaves
 (function(){
   const cv=$('bgfx'); if(!cv || RM) return;
-  const ctx=cv.getContext('2d'); let W=0,H=0,dpr=1, mx=-9999, my=-9999, sx=-9999, sy=-9999; const t0=performance.now();
+  const ctx=cv.getContext('2d'); let W=0,H=0,dpr=1, mx=-9999, my=-9999, sx=-9999, sy=-9999; let t=0, prev=performance.now(), calm=0;
   const size=()=>{ dpr=Math.min(2,devicePixelRatio||1); W=innerWidth; H=innerHeight; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); };
   addEventListener('resize', size); size();
   addEventListener('pointermove', e=>{ mx=e.clientX; my=e.clientY; }, {passive:true});
@@ -770,8 +778,11 @@ document.addEventListener('pointermove', e=>{
     requestAnimationFrame(frame);
     if(document.hidden) return;
     if(now-last > 2000 || !cA){ const cs=getComputedStyle(document.documentElement); cA=cs.getPropertyValue('--accent').trim(); cM=cs.getPropertyValue('--muted').trim(); last=now; }
+    const dt=Math.min(.1,(now-prev)/1000); prev=now;
+    calm += ((mode==='tablet'?1:0)-calm)*.05;           // vista del jefe: fondo más tranquilo
+    t += dt*(1-.6*calm);
+    const amp=2.5-1.5*calm, push=12-7*calm, reach=190-70*calm;
     sx += (mx-sx)*.12; sy += (my-sy)*.12;
-    const t=(now-t0)/1000;
     ctx.clearRect(0,0,W,H);
     for(let i=0;i<3;i++){
       const x = W*(.15+.7*((Math.sin(t*.06+i*2.1)+1)/2)), y = H*(.1+.8*((Math.cos(t*.05+i*1.7)+1)/2)), r = Math.max(W,H)*.42;
@@ -782,9 +793,9 @@ document.addEventListener('pointermove', e=>{
     for(let y=gap/2;y<H;y+=gap){
       for(let x=gap/2;x<W;x+=gap){
         const wv = Math.sin(x*.012 + t*.9) * Math.cos(y*.014 - t*.7);
-        const d = Math.hypot(x-sx,y-sy), k = Math.max(0, 1-d/190);
-        const dx = k ? (x-sx)/(d||1)*k*12 : 0, dy = k ? (y-sy)/(d||1)*k*12 : 0;
-        ctx.beginPath(); ctx.arc(x+dx, y+dy+wv*2.5, 1.1 + k*2.4 + (wv+1)*.35, 0, 6.283);
+        const d = Math.hypot(x-sx,y-sy), k = Math.max(0, 1-d/reach);
+        const dx = k ? (x-sx)/(d||1)*k*push : 0, dy = k ? (y-sy)/(d||1)*k*push : 0;
+        ctx.beginPath(); ctx.arc(x+dx, y+dy+wv*amp, 1.1 + k*2.4 + (wv+1)*.35, 0, 6.283);
         ctx.fillStyle = k>0 ? cA : cM; ctx.globalAlpha = .13 + k*.6 + (wv+1)*.05; ctx.fill();
       }
     }
@@ -870,7 +881,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Enter'){ const t=e.target.
 function renderLog(R){
   const maqName = id => (S.cfg.maquinas.find(m=>m.id===id)||{nombre:id}).nombre;
   const items = R.ev.slice().reverse();
-  const canDel = mode==='tablet' && S.canWrite && R.isToday && S.fb;
+  const canDel = mode==='tablet' && S.canWrite && (R.isToday || S.viewKey < S.todayKey) && S.fb;
   $('log').innerHTML = items.length ? items.map(e=>{
     let txt;
     if(e.tipo==='prod') txt = `<b>${esc(maqName(e.maq))}</b> reportó ${e.cajas} caja${e.cajas===1?'':'s'}${e.sueltas?` + ${e.sueltas} und`:''} = <b class="num">${nf0.format(e.unidades)}</b> und`;
@@ -878,6 +889,7 @@ function renderLog(R){
     else txt = `<span class="t-reanuda">${esc(maqName(e.maq))} reanudó</span>`;
     const del = canDel ? (S.confirmDel===e.id ? `<button class="btn danger" data-del="${esc(e.id)}">Confirmar anular</button>` : `<button class="btn" data-ask="${esc(e.id)}">Anular</button>`) : '';
     const isNew = logInit && !seen.has(e.id); seen.add(e.id);
+    if(e.manual) txt += ` <span class="manual">cargado después</span>`;
     return `<li class="${isNew?'new':''}"><time>${hhmm(bog(e.ts).min)}</time><span>${txt}</span>${del}</li>`;
   }).join('') + (S.dia?.inicio?`<li><time>${S.dia.inicioTs?hhmm(bog(S.dia.inicioTs).min):''}</time><span class="muted">Inventario de inicio de turno registrado</span><span></span></li>`:'')
   : `<li class="empty">${S.dbState==='cargando'?'Cargando…':'Sin registros todavía.'}</li>`;
@@ -889,13 +901,16 @@ function renderPanel(R){
   const p = $('panel');
   const maqs = S.cfg.maquinas.length ? S.cfg.maquinas : [{id:'m1',nombre:'Máquina 1'}];
   if(!S.draft.maq || !maqs.find(m=>m.id===S.draft.maq)) S.draft.maq = maqs[0].id;
+  const pasado = S.viewKey < S.todayKey;
   if(p.dataset.built !== maqs.map(m=>m.id).join()+'|'+S.viewKey){
     p.dataset.built = maqs.map(m=>m.id).join()+'|'+S.viewKey;
     p.innerHTML = `
     <div class="block">
-      <h3>Reportar producción</h3>
+      <h3>${pasado ? 'Cargar producción del ' + esc(fmtFecha(S.viewKey)) : 'Reportar producción'}</h3>
+      ${pasado ? `<p class="calc" style="margin:0">Carga lo que se produjo ese día. Puedes hacerlo en un solo registro con el total del día o en varios, con la hora de cada uno.</p>
+      <div class="field"><label for="pHora">Hora del reporte</label><input id="pHora" type="time" min="07:00" max="17:00" step="60" value="17:00"></div>` : ''}
       <div class="field" ${maqs.length<2?'hidden':''}><label for="pMaq">Máquina</label><select id="pMaq">${maqs.map(m=>`<option value="${esc(m.id)}">${esc(m.nombre)}</option>`).join('')}</select></div>
-      <div class="field"><label for="pCajas">Cajas nuevas desde el último reporte (${UXC} und c/u)</label>
+      <div class="field"><label for="pCajas">${pasado ? 'Cajas producidas' : 'Cajas nuevas desde el último reporte'} (${UXC} und c/u)</label>
         <div class="stepper"><button type="button" id="pMenos" aria-label="Una caja menos">−</button><input id="pCajas" type="number" inputmode="numeric" min="0" step="1"><button type="button" id="pMas" aria-label="Una caja más">+</button></div>
       </div>
       <div class="quick"><button class="btn" data-add="5" type="button">+5</button><button class="btn" data-add="10" type="button">+10</button><button class="btn" data-add="25" type="button">+25</button><button class="btn" data-add="50" type="button">+50</button></div>
@@ -903,18 +918,25 @@ function renderPanel(R){
       <div class="calc" id="pCalc"></div>
       <button class="btn primary" id="pReg" type="button">Registrar producción</button>
     </div>
-    <div class="block">
+    <div class="block" ${pasado?'hidden':''}>
       <h3>Estado de máquinas</h3>
       <div id="pEstados" class="stack" style="gap:8px"></div>
     </div>
+    <div class="block" ${pasado?'':'hidden'}>
+      <h3>Parada de máquina ese día</h3>
+      <div class="field" ${maqs.length<2?'hidden':''}><label for="pPMaq">Máquina</label><select id="pPMaq">${maqs.map(m=>`<option value="${esc(m.id)}">${esc(m.nombre)}</option>`).join('')}</select></div>
+      <div class="row2"><div class="field"><label for="pPIni">Desde</label><input id="pPIni" type="time" step="60"></div><div class="field"><label for="pPFin">Hasta</label><input id="pPFin" type="time" step="60"></div></div>
+      <input type="text" id="pPNota" placeholder="Qué pasó (ej. atasco en válvulas)">
+      <button class="btn danger" id="pPReg" type="button">Registrar parada</button>
+    </div>
     <div class="block">
-      <details id="pInvD"><summary>Inventario de inicio de turno</summary>
+      <details id="pInvD"><summary>${pasado ? 'Inventario al inicio de ese día' : 'Inventario de inicio de turno'}</summary>
         <p class="calc">Cantidad disponible al empezar el turno. Gas, agua y químicos en kg; cinta en metros.</p>
         <div class="inv-grid" id="pInv"></div>
         <button class="btn primary" id="pInvSave" type="button" style="margin-top:10px;width:100%">Guardar inventario</button>
       </details>
     </div>
-    <div class="block" ${S.rol==='admin'?'':'hidden'}>
+    <div class="block" ${S.rol==='admin' && !pasado?'':'hidden'}>
       <details><summary>Meta diaria</summary>
         <div class="row2" style="margin-top:10px"><input id="pMeta" type="number" inputmode="numeric" min="0" step="100" aria-label="Meta diaria en unidades" placeholder="Unidades"><button class="btn" id="pMetaSave" type="button">Guardar meta</button></div>
         <p class="calc">Déjala vacía para no mostrar meta.</p>
@@ -950,8 +972,12 @@ function wirePanel(){
     const cajas=S.draft.cajas, sueltas=S.draft.sueltas||0, unidades=cajas*UXC+sueltas;
     if(unidades<=0) return;
     $('pReg').disabled = true;
-    const ok = await addEvent({id:uid(), ts:Date.now(), tipo:'prod', maq:S.draft.maq, cajas, sueltas, unidades});
-    if(ok){ const art=document.querySelector(`.mach[data-mid="${S.draft.maq}"] .lata3d`); if(art){ foam.burstAt(art); foam.confettiAt(art, 50); } S.draft.cajas=0; S.draft.sueltas=0; $('pCajas').value=0; $('pSueltas').value=''; toast(`Registrado: ${nf0.format(unidades)} unidades`); }
+    const pasado = S.viewKey < S.todayKey;
+    const hora = pasado ? ($('pHora')?.value || '17:00') : null;
+    const ev = {id:uid(), ts: pasado ? tsDe(S.viewKey, hora) : Date.now(), tipo:'prod', maq:S.draft.maq, cajas, sueltas, unidades};
+    if(pasado){ ev.manual = true; ev.cargadoPor = S.nombre || ''; }
+    const ok = await addEvent(ev);
+    if(ok){ const art=document.querySelector(`.mach[data-mid="${S.draft.maq}"] .lata3d`); if(art){ foam.burstAt(art); foam.confettiAt(art, 50); } S.draft.cajas=0; S.draft.sueltas=0; $('pCajas').value=0; $('pSueltas').value=''; toast(pasado ? `Cargado: ${nf0.format(unidades)} unidades a las ${hhmm(bog(ev.ts).min)}` : `Registrado: ${nf0.format(unidades)} unidades`); }
     updCalc();
   };
   $('pEstados').onclick = async e => {
@@ -962,6 +988,16 @@ function wirePanel(){
       if(await addEvent({id:uid(), ts:Date.now(), tipo:'reanuda', maq:id})) toast('Máquina de nuevo en operación'); }
   };
   $('pEstados').oninput = e => { if(e.target.id?.startsWith('nota_')) S.notaFalla[e.target.id.slice(5)] = e.target.value; };
+  if($('pPReg')) $('pPReg').onclick = async () => {
+    const ini=$('pPIni').value, fin=$('pPFin').value, maq=$('pPMaq').value, nota=$('pPNota').value.trim();
+    if(!ini || !fin){ toast('Indica desde qué hora y hasta qué hora estuvo detenida', true); return; }
+    if(fin<=ini){ toast('La hora final debe ser después de la inicial', true); return; }
+    $('pPReg').disabled = true;
+    const extra = {manual:true, cargadoPor:S.nombre||''};
+    const ok = await addEvents([{id:uid(), ts:tsDe(S.viewKey,ini), tipo:'falla', maq, nota, ...extra},{id:uid(), ts:tsDe(S.viewKey,fin), tipo:'reanuda', maq, ...extra}]);
+    $('pPReg').disabled = false;
+    if(ok){ $('pPIni').value=''; $('pPFin').value=''; $('pPNota').value=''; toast('Parada registrada'); }
+  };
   $('pInvSave').onclick = async () => {
     const inicio = {};
     for(const m of MAT){ const v=$('inv_'+m.k).value; if(v!=='' && !isNaN(+v)) inicio[m.k] = fromD(m, +v); }
@@ -983,9 +1019,9 @@ function toast(msg, bad){ const t=$('toast'); t.textContent=msg; t.className='to
 /* ---------- escritura en la base compartida ---------- */
 const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 let wq = Promise.resolve();
-function mutateDia(fn){
+function mutateDia(fn, dia){
   const run = wq.then(async ()=>{
-    const key = bog().key;
+    const key = dia || bog().key;
     const ref = S.db.doc('dias/'+key);
     const snap = await ref.get();
     const cur = snap.exists ? structuredClone(snap.data()) : {fecha:key, inicio:null, inicioTs:null, eventos:[]};
@@ -997,9 +1033,13 @@ function mutateDia(fn){
   wq = run.then(()=>{});
   return run;
 }
-const addEvent = ev => mutateDia(d=>{ d.eventos.push(ev); });
-const setInicio = inicio => mutateDia(d=>{ d.inicio = inicio; d.inicioTs = Date.now(); });
-const removeEvent = id => mutateDia(d=>{ d.eventos = d.eventos.filter(e=>e.id!==id); });
+const diaActivo = () => (S.viewKey < S.todayKey ? S.viewKey : bog().key);
+const addEvent = ev => mutateDia(d=>{ d.eventos.push(ev); }, diaActivo());
+const addEvents = evs => mutateDia(d=>{ d.eventos.push(...evs); }, diaActivo());
+const setInicio = inicio => mutateDia(d=>{ d.inicio = inicio; d.inicioTs = Date.now(); }, diaActivo());
+const removeEvent = id => mutateDia(d=>{ d.eventos = d.eventos.filter(e=>e.id!==id); }, S.viewKey);
+// hora local de Barranquilla (UTC-5) en un día dado → marca de tiempo
+function tsDe(key, hhmm){ const [y,m,d]=key.split('-').map(Number); const [hh,mi]=(hhmm||'00:00').split(':').map(Number); return Date.UTC(y,m-1,d,hh+5,mi); }
 function writeErr(err){
   if(err?.code==='permission-denied') err={code:'invalid_argument'};
   if(err?.code==='invalid_argument'){ S.canWrite=false; toast('Tu usuario no tiene permiso para esta acción.', true); render(); }
