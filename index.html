@@ -5,7 +5,46 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Planta Aerobol</title>
 <meta name="theme-color" content="#0B111B">
-<style>html,body{margin:0}[hidden]{display:none!important}*{box-sizing:border-box}</style>
+<style>html,body{margin:0}[hidden]{display:none!important}*{box-sizing:border-box}html.rol-tv .seg,html.rol-tv #dia{display:none!important}
+
+/* ── tablero del TV ── */
+.tvb{display:flex;flex-direction:column;gap:1.2rem}
+.tv-lbl{font-size:.85rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.tv-hero{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:1.2rem}
+@media (max-width:900px){.tv-hero{grid-template-columns:1fr}}
+.tv-main,.tv-box,.tvm{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:1.2rem 1.4rem;position:relative;overflow:hidden}
+.tv-main{display:flex;flex-direction:column;justify-content:center;border-color:var(--accent)}
+.tv-num{font-family:var(--display);font-weight:700;font-size:clamp(4rem,9vw,9rem);line-height:.95;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.tv-num small,.tv-num2 small,.tvm-n small{font-family:var(--body);font-size:.28em;font-weight:600;color:var(--muted);margin-left:.4em;letter-spacing:0}
+.tv-sub{font-size:clamp(1.2rem,2vw,2rem);color:var(--muted)}
+.tv-sub b{color:var(--ink);font-variant-numeric:tabular-nums}
+.tv-side{display:flex;flex-direction:column;gap:1.2rem}
+.tv-box{flex:1;display:flex;flex-direction:column;justify-content:center;gap:.4rem}
+.tv-num2{font-family:var(--display);font-weight:700;font-size:clamp(2.2rem,4vw,3.6rem);line-height:1;font-variant-numeric:tabular-nums}
+.tv-bar{flex:none;height:14px;border-radius:7px;background:var(--surface-2);overflow:hidden}
+.tv-bar i{display:block;height:100%;background:var(--ok);border-radius:6px;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.tv-sub2{font-size:1rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.tv-prev{font-size:clamp(1.1rem,1.8vw,1.6rem);font-variant-numeric:tabular-nums}
+.tv-prev b{font-family:var(--display);font-size:1.4em}
+.tv-muted{color:var(--muted);font-weight:500}
+.tv-maqs{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1.2rem}
+.tvm{border-left:10px solid var(--idle);display:flex;flex-direction:column;gap:.35rem}
+.tvm.ok{border-left-color:var(--ok)}
+.tvm.bad{border-left-color:var(--bad);background:var(--bad-bg);animation:alarm 1.6s ease-in-out infinite}
+.tvm-h{display:flex;justify-content:space-between;align-items:center;gap:.6rem;font-family:var(--display);font-weight:700;font-size:clamp(1.4rem,2.2vw,2.2rem)}
+.tvm .pill{font-size:.9rem;padding:5px 12px}
+.tvm-n{font-family:var(--display);font-weight:700;font-size:clamp(3rem,6vw,5.5rem);line-height:1;font-variant-numeric:tabular-nums}
+.tvm-c{font-size:clamp(1.1rem,1.8vw,1.6rem);color:var(--muted)}
+.tvm-f{font-size:1.2rem;font-weight:700;color:var(--bad)}
+.tvm-u{font-size:clamp(1rem,1.5vw,1.3rem);color:var(--muted);margin-top:.3rem}
+.tvm-u b{color:var(--ink)}
+.tv-last{display:flex;align-items:center;gap:.8rem;padding:1rem 1.4rem;border-radius:10px;background:var(--surface-2);font-size:clamp(1.1rem,1.8vw,1.6rem)}
+.tv-last .livedot{width:12px;height:12px}
+.tv-ago{color:var(--muted);font-size:.8em;margin-left:.3em}
+.tv-ago::before{content:"("}.tv-ago::after{content:")"}
+.tv-bad{color:var(--bad)}
+html.rol-tv .userchip,html.rol-tv #fs{font-size:.8rem}
+</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Michroma&family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
@@ -399,6 +438,7 @@ tbody tr:hover td:first-child{padding-left:14px}
   <div id="banner" hidden></div>
 
   <section class="kpis" id="kpis" aria-live="polite"></section>
+  <section class="tvb" id="tvBoard" hidden aria-live="polite"></section>
 
   <div class="layout" id="layout">
     <aside class="card panel only-tablet" id="panel"></aside>
@@ -481,11 +521,28 @@ let mode = 'tablet';
 const foam = {add(){},clear(){},burstAt(){},confettiAt(){},set ambient(v){},set tint(v){},set confettiRate(v){}};
 
 /* ---------- cálculo ---------- */
+// Reportes con 'acum' = total del día de esa máquina (contador). Se convierten en incrementos.
+// Reportes viejos sin 'acum' se toman como incremento (compatibilidad).
+function normEvents(list){
+  const ev = (list||[]).slice().sort((a,b)=>a.ts-b.ts).map(e=>({...e}));
+  const run = {};
+  for(const e of ev){
+    if(e.tipo!=='prod') continue;
+    const prev = run[e.maq]||0;
+    if(e.acum!=null){ e.unidades = Math.max(0, e.acum-prev); run[e.maq] = Math.max(prev, e.acum); }
+    else run[e.maq] = prev + (e.unidades||0);
+    e.totalMaq = run[e.maq];
+  }
+  return ev;
+}
+function repAntes(maq, ts){ let r={total:0, ts:null}; for(const e of normEvents(S.dia?.eventos)) if(e.tipo==='prod' && e.maq===maq && e.ts<=ts) r={total:e.totalMaq, ts:e.ts}; return r; }
+function repDespues(maq, ts){ for(const e of normEvents(S.dia?.eventos)) if(e.tipo==='prod' && e.maq===maq && e.ts>ts) return {total:e.totalMaq, ts:e.ts}; return null; }
+const fmtCaj = u => `${nf0.format(Math.floor(u/UXC))} caja${Math.floor(u/UXC)===1?'':'s'}${u%UXC?` + ${u%UXC} und`:''}`;
 function compute(){
   const isToday = S.viewKey===S.todayKey;
   const now = bog();
   const nowMin = isToday ? now.min : 1440;
-  const ev = (S.dia?.eventos||[]).slice().sort((a,b)=>a.ts-b.ts);
+  const ev = normEvents(S.dia?.eventos);
   const maqs = S.cfg.maquinas.length ? S.cfg.maquinas : [{id:'m1',nombre:'Máquina 1'}];
   const M = {};
   for(const m of maqs) M[m.id] = {id:m.id, nombre:m.nombre, und:0, lastTs:null, down:false, downSince:null, downMin:0, nota:'', fallas:0};
@@ -566,11 +623,65 @@ function render(){
     b.innerHTML=`Estás viendo el <b>${esc(fmtFecha(S.viewKey))}</b>. ${puede ? (mode==='tablet' ? 'Puedes cargar lo que se produjo ese día en el panel de la izquierda.' : 'Para cargar lo que se produjo ese día, cambia a <b>Registro</b>.') : ''} <button class="btn" id="volverHoy" style="margin-left:8px">Volver a hoy</button>`; $('volverHoy').onclick=()=>abrirDia(S.todayKey); }
   else b.hidden=true;
 
+  const esTV = S.rol==='tv';
+  $('kpis').hidden = esTV; $('layout').hidden = esTV; $('tvBoard').hidden = !esTV;
+  if(esTV){ renderTV(R); return; }
   renderKpis(R); renderMachines(R); renderChart(R); renderMaterials(R); renderLog(R); renderHist();
   requestAnimationFrame(segInd);
   if(!$('panel').hidden) renderPanel(R);
 }
 
+const fmtCorta = k => { const [y,m,d]=k.split('-').map(Number); return new Date(Date.UTC(y,m-1,d)).toLocaleDateString('es-CO',{weekday:'short',day:'numeric',month:'short',timeZone:'UTC'}); };
+function renderTV(R){
+  const tb = $('tvBoard');
+  const meta = S.cfg.meta;
+  const maqName = id => (S.cfg.maquinas.find(m=>m.id===id)||{nombre:id}).nombre;
+  const prev = (S.hist||[]).filter(d=>d.fecha < S.todayKey).map(resumenDia).find(d=>d.und>0);
+  const cajas = Math.floor(R.total/UXC), sueltas = R.total%UXC;
+  const que = e => e.tipo==='prod'
+      ? (e.acum!=null ? `reportó <b>${fmtCaj(e.acum)}</b> en ${esc(maqName(e.maq))}` : `reportó <b>${nf0.format(e.unidades)}</b> envases en ${esc(maqName(e.maq))}`)
+      : e.tipo==='falla' ? `reportó <b class="tv-bad">falla</b> en ${esc(maqName(e.maq))}${e.nota?` (${esc(e.nota)})`:''}`
+      : `reanudó ${esc(maqName(e.maq))}`;
+  const last = R.ev[R.ev.length-1];
+  const lastTxt = last ? `<b>${hhmm(bog(last.ts).min)}</b> · ${esc(last.por||'Planta')} ${que(last)} <span class="tv-ago">${ago(last.ts)}</span>` : 'Aún no hay reportes hoy';
+  const maqs = R.M.map(m=>{
+    const ult = R.ev.filter(e=>e.maq===m.id && e.tipo==='prod').pop();
+    const st = m.down ? 'bad' : (m.und>0 ? 'ok' : '');
+    const pill = m.down ? '<span class="pill bad blink">Detenida</span>' : m.und>0 ? '<span class="pill ok">Produciendo</span>' : '<span class="pill">Sin reportes</span>';
+    return `<article class="tvm ${st}">
+      <div class="tvm-h"><span>${esc(m.nombre)}</span>${pill}</div>
+      <div class="tvm-n">${cnt('tvm_'+m.id, m.und)}<small>envases</small></div>
+      <div class="tvm-c">${nf0.format(Math.floor(m.und/UXC))} cajas${m.rate?` · ${nf0.format(m.rate*60)} envases/h`:''}</div>
+      ${m.down ? `<div class="tvm-f">Detenida desde ${hhmm(bog(m.downSince).min)}${m.nota?` · ${esc(m.nota)}`:''}</div>` : ''}
+      <div class="tvm-u">${ult ? `Último reporte <b>${hhmm(bog(ult.ts).min)}</b>${ult.por?` · ${esc(ult.por)}`:''}` : 'Sin reportes hoy'}</div>
+      ${!m.down && m.und>0 ? `<div class="belt" style="animation-delay:-${(Date.now()%900)/1000}s"></div>` : ''}
+    </article>`;
+  }).join('');
+  tb.innerHTML = `
+    <div class="tv-hero">
+      <div class="tv-main">
+        <span class="tv-lbl">Producido hoy</span>
+        <div class="tv-num">${cnt('tvTotal', R.total)}<small>envases</small></div>
+        <div class="tv-sub">= <b>${nf0.format(cajas)}</b> cajas${sueltas?` + ${sueltas} envases`:''}</div>
+      </div>
+      <div class="tv-side">
+        <div class="tv-box">
+          <span class="tv-lbl">Meta del día</span>
+          ${meta ? `<div class="tv-num2">${nf0.format(meta)}<small>envases</small></div>
+            <div class="tv-bar"><i style="width:${Math.min(100,R.total/meta*100)}%"></i></div>
+            <div class="tv-sub2">${nf1.format(R.total/meta*100)} % cumplido · faltan ${nf0.format(Math.max(0,meta-R.total))}</div>`
+                 : `<div class="tv-num2 tv-muted">Sin meta definida</div>`}
+        </div>
+        <div class="tv-box">
+          <span class="tv-lbl">Día anterior${prev?` · ${esc(fmtCorta(prev.fecha))}`:''}</span>
+          ${prev ? `<div class="tv-prev"><b>${nf0.format(prev.und)}</b> envases · ${nf0.format(prev.cajas)} cajas</div>` : `<div class="tv-prev tv-muted">Sin registros</div>`}
+        </div>
+      </div>
+    </div>
+    <div class="tv-maqs">${maqs}</div>
+    <div class="tv-last"><i class="livedot"></i><span>Última actualización: ${lastTxt}</span></div>`;
+  runCounters(tb);
+}
 function fmtFecha(k){ const [y,m,d]=k.split('-').map(Number); return new Date(Date.UTC(y,m-1,d)).toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long',timeZone:'UTC'}); }
 
 function renderKpis(R){
@@ -806,7 +917,7 @@ document.addEventListener('pointermove', e=>{
 
 /* ---------- historial ---------- */
 function resumenDia(d){
-  const ev = (d.eventos||[]).slice().sort((a,b)=>a.ts-b.ts);
+  const ev = normEvents(d.eventos);
   let und=0, cajas=0, fallas=0, down=0, primero=null, ultimo=null;
   const abiertas = {};
   const esHoy = d.fecha===S.todayKey;
@@ -884,11 +995,14 @@ function renderLog(R){
   const canDel = mode==='tablet' && S.canWrite && (R.isToday || S.viewKey < S.todayKey) && S.fb;
   $('log').innerHTML = items.length ? items.map(e=>{
     let txt;
-    if(e.tipo==='prod') txt = `<b>${esc(maqName(e.maq))}</b> reportó ${e.cajas} caja${e.cajas===1?'':'s'}${e.sueltas?` + ${e.sueltas} und`:''} = <b class="num">${nf0.format(e.unidades)}</b> und`;
+    if(e.tipo==='prod') txt = e.acum!=null
+      ? `<b>${esc(maqName(e.maq))}</b>: van <b class="num">${fmtCaj(e.acum)}</b> (${nf0.format(e.acum)} und) <span class="muted">· +${nf0.format(e.unidades)} und desde el reporte anterior</span>`
+      : `<b>${esc(maqName(e.maq))}</b> reportó ${e.cajas} caja${e.cajas===1?'':'s'}${e.sueltas?` + ${e.sueltas} und`:''} = <b class="num">${nf0.format(e.unidades)}</b> und`;
     else if(e.tipo==='falla') txt = `<span class="t-falla">Falla en ${esc(maqName(e.maq))}</span>${e.nota?` <span class="muted">· ${esc(e.nota)}</span>`:''}`;
     else txt = `<span class="t-reanuda">${esc(maqName(e.maq))} reanudó</span>`;
     const del = canDel ? (S.confirmDel===e.id ? `<button class="btn danger" data-del="${esc(e.id)}">Confirmar anular</button>` : `<button class="btn" data-ask="${esc(e.id)}">Anular</button>`) : '';
     const isNew = logInit && !seen.has(e.id); seen.add(e.id);
+    if(e.por) txt += ` <span class="muted">· ${esc(e.por)}</span>`;
     if(e.manual) txt += ` <span class="manual">cargado después</span>`;
     return `<li class="${isNew?'new':''}"><time>${hhmm(bog(e.ts).min)}</time><span>${txt}</span>${del}</li>`;
   }).join('') + (S.dia?.inicio?`<li><time>${S.dia.inicioTs?hhmm(bog(S.dia.inicioTs).min):''}</time><span class="muted">Inventario de inicio de turno registrado</span><span></span></li>`:'')
@@ -901,20 +1015,22 @@ function renderPanel(R){
   const p = $('panel');
   const maqs = S.cfg.maquinas.length ? S.cfg.maquinas : [{id:'m1',nombre:'Máquina 1'}];
   if(!S.draft.maq || !maqs.find(m=>m.id===S.draft.maq)) S.draft.maq = maqs[0].id;
+  if(p.dataset.built !== maqs.map(m=>m.id).join()+'|'+S.viewKey) S.draft.dirty = false;
   const pasado = S.viewKey < S.todayKey;
   if(p.dataset.built !== maqs.map(m=>m.id).join()+'|'+S.viewKey){
     p.dataset.built = maqs.map(m=>m.id).join()+'|'+S.viewKey;
     p.innerHTML = `
     <div class="block">
       <h3>${pasado ? 'Cargar producción del ' + esc(fmtFecha(S.viewKey)) : 'Reportar producción'}</h3>
-      ${pasado ? `<p class="calc" style="margin:0">Carga lo que se produjo ese día. Puedes hacerlo en un solo registro con el total del día o en varios, con la hora de cada uno.</p>
+      ${pasado ? `<p class="calc" style="margin:0">Escribe cuántas cajas iban en total a cada hora. Puedes cargar solo el total al final del día o varios cortes (ej. 10:00 → 120, 14:00 → 300).</p>
       <div class="field"><label for="pHora">Hora del reporte</label><input id="pHora" type="time" min="07:00" max="17:00" step="60" value="17:00"></div>` : ''}
       <div class="field" ${maqs.length<2?'hidden':''}><label for="pMaq">Máquina</label><select id="pMaq">${maqs.map(m=>`<option value="${esc(m.id)}">${esc(m.nombre)}</option>`).join('')}</select></div>
-      <div class="field"><label for="pCajas">${pasado ? 'Cajas producidas' : 'Cajas nuevas desde el último reporte'} (${UXC} und c/u)</label>
+      <div class="field"><label for="pCajas">Total de cajas en el día hasta ${pasado ? 'esa hora' : 'ahora'} (${UXC} und c/u)</label>
+        <span class="calc" id="pUlt"></span>
         <div class="stepper"><button type="button" id="pMenos" aria-label="Una caja menos">−</button><input id="pCajas" type="number" inputmode="numeric" min="0" step="1"><button type="button" id="pMas" aria-label="Una caja más">+</button></div>
       </div>
       <div class="quick"><button class="btn" data-add="5" type="button">+5</button><button class="btn" data-add="10" type="button">+10</button><button class="btn" data-add="25" type="button">+25</button><button class="btn" data-add="50" type="button">+50</button></div>
-      <div class="field"><label for="pSueltas">Unidades sueltas (sin completar caja)</label><input id="pSueltas" type="number" inputmode="numeric" min="0" max="23" step="1"></div>
+      <div class="field"><label for="pSueltas">Unidades sueltas en ese total (sin completar caja)</label><input id="pSueltas" type="number" inputmode="numeric" min="0" max="23" step="1"></div>
       <div class="calc" id="pCalc"></div>
       <button class="btn primary" id="pReg" type="button">Registrar producción</button>
     </div>
@@ -950,6 +1066,7 @@ function renderPanel(R){
     fillInv();
     $('pMeta').value = S.cfg.meta ?? '';
   }
+  if(!S.draft.dirty){ const a = repAntes(S.draft.maq, horaReporte()).total; S.draft.cajas = Math.floor(a/UXC); S.draft.sueltas = a%UXC; }
   if(document.activeElement!==$('pCajas')) $('pCajas').value = S.draft.cajas;
   if(document.activeElement!==$('pSueltas')) $('pSueltas').value = S.draft.sueltas || '';
   $('pMaq').value = S.draft.maq;
@@ -959,26 +1076,42 @@ function renderPanel(R){
              : `<input type="text" id="nota_${esc(m.id)}" placeholder="Qué pasó (ej. atasco en válvulas)" value="${esc(S.notaFalla[m.id]||'')}"><button class="btn danger" data-falla="${esc(m.id)}" type="button">Reportar falla</button>`}</div>`).join('');
 }
 function fillInv(){ const ini = S.dia?.inicio || {}; for(const m of MAT){ const el=$('inv_'+m.k); if(el && document.activeElement!==el) el.value = ini[m.k]!=null ? +toD(m,ini[m.k]).toFixed(3) : ''; } }
-function updCalc(){ const u = S.draft.cajas*UXC + (S.draft.sueltas||0); $('pCalc').innerHTML = `= <b>${nf0.format(u)}</b> unidades · gas <b>${nf2.format(u*53.4/1000)}</b> kg · agua <b>${nf2.format(u*451.725/1000)}</b> kg`; $('pReg').disabled = u<=0; }
+function horaReporte(){ return S.viewKey < S.todayKey ? tsDe(S.viewKey, $('pHora')?.value || '17:00') : Date.now(); }
+function updCalc(){
+  const ts = horaReporte();
+  const total = S.draft.cajas*UXC + (S.draft.sueltas||0);
+  const ant = repAntes(S.draft.maq, ts), sig = repDespues(S.draft.maq, ts);
+  const inc = total - ant.total;
+  $('pUlt').innerHTML = ant.ts ? `Reporte anterior: <b>${fmtCaj(ant.total)}</b> a las ${hhmm(bog(ant.ts).min)}` : 'Primer reporte del día';
+  let msg = '', ok = inc > 0;
+  if(sig && total > sig.total){ ok = false; msg = `<span class="delta-down">No puede ser mayor que el reporte de las ${hhmm(bog(sig.ts).min)} (${fmtCaj(sig.total)})</span>`; }
+  else if(inc > 0) msg = `+<b>${nf0.format(inc)}</b> und desde el reporte anterior (${fmtCaj(inc)}) · gas <b>${nf2.format(inc*53.4/1000)}</b> kg · agua <b>${nf2.format(inc*451.725/1000)}</b> kg`;
+  else if(S.draft.dirty) msg = `<span class="delta-down">Debe ser mayor que el reporte anterior. Si el anterior estaba mal, anúlalo en la bitácora.</span>`;
+  $('pCalc').innerHTML = msg;
+  $('pReg').disabled = !ok;
+}
 
 function wirePanel(){
-  $('pMaq').onchange = e => { S.draft.maq = e.target.value; };
-  $('pCajas').oninput = e => { S.draft.cajas = Math.max(0, parseInt(e.target.value)||0); updCalc(); };
-  $('pSueltas').oninput = e => { S.draft.sueltas = Math.min(23, Math.max(0, parseInt(e.target.value)||0)); updCalc(); };
-  $('pMenos').onclick = () => { S.draft.cajas = Math.max(0, S.draft.cajas-1); $('pCajas').value=S.draft.cajas; updCalc(); };
-  $('pMas').onclick = () => { S.draft.cajas++; $('pCajas').value=S.draft.cajas; updCalc(); };
-  $('panel').querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{ S.draft.cajas += +b.dataset.add; $('pCajas').value=S.draft.cajas; updCalc(); });
+  $('pMaq').onchange = e => { S.draft.maq = e.target.value; S.draft.dirty = false; renderPanel(compute()); };
+  if($('pHora')) $('pHora').oninput = () => { if(!S.draft.dirty){ const a=repAntes(S.draft.maq, horaReporte()).total; S.draft.cajas=Math.floor(a/UXC); S.draft.sueltas=a%UXC; $('pCajas').value=S.draft.cajas; $('pSueltas').value=S.draft.sueltas||''; } updCalc(); };
+  $('pCajas').oninput = e => { S.draft.dirty = true; S.draft.cajas = Math.max(0, parseInt(e.target.value)||0); updCalc(); };
+  $('pSueltas').oninput = e => { S.draft.dirty = true; S.draft.sueltas = Math.min(23, Math.max(0, parseInt(e.target.value)||0)); updCalc(); };
+  $('pMenos').onclick = () => { S.draft.dirty = true; S.draft.cajas = Math.max(0, S.draft.cajas-1); $('pCajas').value=S.draft.cajas; updCalc(); };
+  $('pMas').onclick = () => { S.draft.dirty = true; S.draft.cajas++; $('pCajas').value=S.draft.cajas; updCalc(); };
+  $('panel').querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{ S.draft.dirty = true; S.draft.cajas += +b.dataset.add; $('pCajas').value=S.draft.cajas; updCalc(); });
   $('pReg').onclick = async () => {
-    const cajas=S.draft.cajas, sueltas=S.draft.sueltas||0, unidades=cajas*UXC+sueltas;
-    if(unidades<=0) return;
+    const cajas=S.draft.cajas, sueltas=S.draft.sueltas||0, total=cajas*UXC+sueltas;
+    const ant = repAntes(S.draft.maq, horaReporte()), sig = repDespues(S.draft.maq, horaReporte());
+    const unidades = total - ant.total;
+    if(unidades<=0 || (sig && total>sig.total)){ updCalc(); return; }
     $('pReg').disabled = true;
     const pasado = S.viewKey < S.todayKey;
     const hora = pasado ? ($('pHora')?.value || '17:00') : null;
-    const ev = {id:uid(), ts: pasado ? tsDe(S.viewKey, hora) : Date.now(), tipo:'prod', maq:S.draft.maq, cajas, sueltas, unidades};
+    const ev = {id:uid(), ts: pasado ? tsDe(S.viewKey, hora) : Date.now(), tipo:'prod', maq:S.draft.maq, cajas, sueltas, acum:total, unidades};
     if(pasado){ ev.manual = true; ev.cargadoPor = S.nombre || ''; }
     const ok = await addEvent(ev);
-    if(ok){ const art=document.querySelector(`.mach[data-mid="${S.draft.maq}"] .lata3d`); if(art){ foam.burstAt(art); foam.confettiAt(art, 50); } S.draft.cajas=0; S.draft.sueltas=0; $('pCajas').value=0; $('pSueltas').value=''; toast(pasado ? `Cargado: ${nf0.format(unidades)} unidades a las ${hhmm(bog(ev.ts).min)}` : `Registrado: ${nf0.format(unidades)} unidades`); }
-    updCalc();
+    if(ok){ const art=document.querySelector(`.mach[data-mid="${S.draft.maq}"] .lata3d`); if(art){ foam.burstAt(art); foam.confettiAt(art, 50); } S.draft.dirty=false; toast(`${pasado?'Cargado':'Registrado'}: van ${fmtCaj(total)} (+${nf0.format(unidades)} und)${pasado?` a las ${hhmm(bog(ev.ts).min)}`:''}`); }
+    renderPanel(compute());
   };
   $('pEstados').onclick = async e => {
     const f = e.target.closest('[data-falla]'), r = e.target.closest('[data-reanuda]');
@@ -1034,8 +1167,8 @@ function mutateDia(fn, dia){
   return run;
 }
 const diaActivo = () => (S.viewKey < S.todayKey ? S.viewKey : bog().key);
-const addEvent = ev => mutateDia(d=>{ d.eventos.push(ev); }, diaActivo());
-const addEvents = evs => mutateDia(d=>{ d.eventos.push(...evs); }, diaActivo());
+const addEvent = ev => mutateDia(d=>{ d.eventos.push({...ev, por:S.nombre||''}); }, diaActivo());
+const addEvents = evs => mutateDia(d=>{ d.eventos.push(...evs.map(ev=>({...ev, por:S.nombre||''}))); }, diaActivo());
 const setInicio = inicio => mutateDia(d=>{ d.inicio = inicio; d.inicioTs = Date.now(); }, diaActivo());
 const removeEvent = id => mutateDia(d=>{ d.eventos = d.eventos.filter(e=>e.id!==id); }, S.viewKey);
 // hora local de Barranquilla (UTC-5) en un día dado → marca de tiempo
@@ -1054,7 +1187,7 @@ $$('log').addEventListener('click', async e=>{
   if(a){ S.confirmDel=a.dataset.ask; renderLog(compute()); setTimeout(()=>{ if(S.confirmDel===a.dataset.ask){ S.confirmDel=null; renderLog(compute()); } }, 5000); }
   if(d){ const id=d.dataset.del; S.confirmDel=null; if(await removeEvent(id)) toast('Registro anulado'); }
 });
-function setMode(m){ mode=m; try{localStorage.setItem('modo',m);}catch(e){} if(m==='tv') wake(); render(); }
+function setMode(m){ if(S.rol==='tv' || S.rol==='gerencia') m='tv'; mode=m; try{localStorage.setItem('modo',m);}catch(e){} if(m==='tv') wake(); render(); }
 $$('mTablet').onclick=()=>setMode('tablet');
 $$('mTv').onclick=()=>setMode('tv');
 $$('fs').onclick=()=>{ document.documentElement.requestFullscreen?.().catch(()=>{}); wake(); };
@@ -1079,7 +1212,7 @@ function subDia(){
 function subHist(){
   S.db.collection('dias').orderBy('fecha','desc').limit(120).onSnapshot(snap=>{
     S.hist = snap.docs.map(d=>d.data()).filter(d=>d && d.fecha);
-    renderHist();
+    if(S.rol==='tv') render(); else renderHist();
   }, ()=>{});
 }
 function subCfg(){
@@ -1093,7 +1226,7 @@ function subCfg(){
 }
 
 /* ---------- arranque (Firebase) ---------- */
-const ROL_TXT = {admin:'Administrador', jefe:'Jefe de planta'};
+const ROL_TXT = {admin:'Administrador', jefe:'Jefe de planta', tv:'Pantalla TV', gerencia:'Gerencia'};
 const DOMINIO_USUARIOS = 'aerobol.com.co';
 const FB_V = '10.14.1';
 let FBX = null;
@@ -1137,18 +1270,19 @@ const busy = on => { const b=$$('lBtn'); b.disabled=on; b.textContent = on ? 'Ve
 async function enterApp(user){
   const perfil = await FBX.fsM.getDoc(FBX.fsM.doc(FBX.db,'usuarios',user.uid)).catch(()=>null);
   const d = perfil && perfil.exists() ? perfil.data() : null;
-  if(!d || !(d.rol==='admin' || d.rol==='jefe')){
+  if(!d || !['admin','jefe','tv','gerencia'].includes(d.rol)){
     await FBX.authM.signOut(FBX.auth); busy(false);
     $$('login').hidden=false; lerr('Este usuario no tiene rol asignado. Pide al administrador que lo active.'); return;
   }
   S.db = makeDB(FBX.fsM, FBX.db); S.fb = S.db;
-  S.user = user; S.rol = d.rol; S.nombre = d.nombre || user.email; S.canWrite = true;
+  S.user = user; S.rol = d.rol; S.nombre = d.nombre || user.email; S.canWrite = (d.rol==='admin' || d.rol==='jefe');
+  if(d.rol==='tv'){ document.documentElement.classList.add('rol-tv'); const mc=$$('materials')?.closest('.card'); if(mc) mc.hidden=true; const hc=$$('histCard'); if(hc) hc.hidden=true; }
   if(S.rol==='admin'){
     const c = await FBX.fsM.getDoc(FBX.fsM.doc(FBX.db,'config','planta')).catch(()=>null);
     if(c && !c.exists()) await FBX.fsM.setDoc(c.ref,{maquinas:[{id:'m1',nombre:'Máquina automática 1'}], meta:null, historico:[{etiqueta:'Día 1',unidades:12000},{etiqueta:'Día 2',unidades:8000}]}).catch(()=>{});
   }
   const saved = (()=>{ try{ return localStorage.getItem('modo'); }catch(e){ return null; } })();
-  mode = S.rol==='jefe' ? 'tablet' : (saved || 'tv');
+  mode = S.rol==='jefe' ? 'tablet' : (S.rol==='tv' || S.rol==='gerencia') ? 'tv' : (saved || 'tv');
   $$('userchip').innerHTML = `<b>${esc(S.nombre)}</b><span class="rol">${ROL_TXT[S.rol]}</span>`;
   $$('login').classList.add('out');
   setTimeout(()=>{ $$('login').hidden=true; }, 450);
