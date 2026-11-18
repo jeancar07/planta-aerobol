@@ -255,6 +255,9 @@ details summary{cursor:pointer;font-weight:600;list-style-position:inside}
 
 .toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:4px;font-weight:500;box-shadow:0 6px 24px rgb(0 0 0 / .25);z-index:10;max-width:calc(100% - 32px)}
 .toast.bad{background:var(--bad);color:#fff}
+.net{position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:60;background:#b7791f;color:#fff;padding:8px 16px;border-radius:999px;font-weight:600;font-size:14px;box-shadow:0 6px 20px rgb(0 0 0/.3);max-width:92vw;text-align:center}
+.net.off{background:var(--bad)}
+.btn.warn{background:#b7791f!important;border-color:#b7791f!important;color:#fff!important}
 
 /* movimiento */
 .mach{position:relative;overflow:hidden}
@@ -494,6 +497,7 @@ tbody tr:hover td:first-child{padding-left:14px}
   </div>
 </div>
 <div class="toast" id="toast" hidden></div>
+<div class="net" id="net" hidden role="status"></div>
 <script type="module">
 const firebaseConfig = {
   apiKey: "AIzaSyD-7XXfvPJIwRzICKsbI2ZeQ4oa14AQzIU",
@@ -524,6 +528,7 @@ const MAT = [
   {k:'cinta',     n:'Cinta transparente Bolten',                  g:'Envasado', q:4.33, u:'cm',  c:1.69},
 ];
 const COSTO_U = MAT.reduce((s,m)=>s+m.c,0);           // $2.215,62
+const GRANDE_UND = 300*24;  // un salto de 300 cajas o más en un solo reporte pide confirmación
 const UXC = 24, T_INI = 420, T_FIN = 1020, ALM_I = 720, ALM_F = 780;
 const OFF = -5*60*60000;                              // Bogotá UTC-5, sin horario de verano
 
@@ -958,9 +963,12 @@ document.addEventListener('pointermove', e=>{
   addEventListener('pointermove', e=>{ mx=e.clientX; my=e.clientY; }, {passive:true});
   document.addEventListener('pointerleave', ()=>{ mx=my=-9999; });
   let cA='', cM='', last=0;
+  let lastF=0;
   function frame(now){
     requestAnimationFrame(frame);
     if(document.hidden) return;
+    const fps = S.rol==='tv' ? 12 : mode==='tablet' ? 20 : 30;     // menos consumo en TV y tablet
+    if(now-lastF < 1000/fps) return; lastF=now;
     if(now-last > 2000 || !cA){ const cs=getComputedStyle(document.documentElement); cA=cs.getPropertyValue('--accent').trim(); cM=cs.getPropertyValue('--muted').trim(); last=now; }
     const dt=Math.min(.1,(now-prev)/1000); prev=now;
     calm += ((mode==='tablet'?1:0)-calm)*.05;           // vista del jefe: fondo más tranquilo
@@ -1177,6 +1185,13 @@ function wirePanel(){
     const ant = repAntes(S.draft.maq, horaReporte()), sig = repDespues(S.draft.maq, horaReporte());
     const unidades = total - ant.total;
     if(unidades<=0 || (sig && total>sig.total)){ updCalc(); return; }
+    const grande = unidades >= GRANDE_UND;
+    if(grande && S.confirmGrande!==total){
+      S.confirmGrande=total; const b=$('pReg'); b.textContent=`Confirmar: +${fmtCaj(unidades)} en un solo reporte`; b.classList.add('warn');
+      setTimeout(()=>{ if(S.confirmGrande===total){ S.confirmGrande=null; b.textContent='Registrar producción'; b.classList.remove('warn'); } }, 6000);
+      return;
+    }
+    S.confirmGrande=null; $('pReg').textContent='Registrar producción'; $('pReg').classList.remove('warn');
     $('pReg').disabled = true;
     const pasado = S.viewKey < S.todayKey;
     const hora = pasado ? ($('pHora')?.value || '17:00') : null;
@@ -1212,8 +1227,7 @@ function wirePanel(){
   };
   $('pMetaSave').onclick = async () => {
     const v = $('pMeta').value.trim(); const meta = v==='' ? null : Math.max(0, Math.round(+v));
-    try{ const ref=S.db.doc('config/planta'); const snap=await ref.get(); const cur=snap.exists?structuredClone(snap.data()):{maquinas:S.cfg.maquinas,historico:S.cfg.historico}; cur.meta=meta; await ref.set(cur); toast(meta?`Meta: ${nf0.format(meta)} unidades`:'Meta eliminada'); }
-    catch(err){ writeErr(err); }
+    if(await escribir(S.db.doc('config/planta').merge({meta}))) toast(meta?`Meta: ${nf0.format(meta)} unidades`:'Meta eliminada');
   };
 }
 
@@ -1224,26 +1238,26 @@ function toast(msg, bad){ const t=$('toast'); t.textContent=msg; t.className='to
 
 /* ---------- escritura en la base compartida ---------- */
 const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,7);
-let wq = Promise.resolve();
-function mutateDia(fn, dia){
-  const run = wq.then(async ()=>{
-    const key = dia || bog().key;
-    const ref = S.db.doc('dias/'+key);
-    const snap = await ref.get();
-    const cur = snap.exists ? structuredClone(snap.data()) : {fecha:key, inicio:null, inicioTs:null, eventos:[]};
-    if(!Array.isArray(cur.eventos)) cur.eventos = [];
-    fn(cur);
-    await ref.set(cur);
-    return true;
-  }).catch(err=>{ writeErr(err); return false; });
-  wq = run.then(()=>{});
-  return run;
+// Escrituras atómicas (arrayUnion/merge): dos personas registrando a la vez no se pisan,
+// y sin conexión quedan guardadas en el equipo y se envían solas al volver la red.
+function escribir(p){
+  return new Promise(res=>{
+    let listo=false;
+    p.then(()=>{ if(!listo){ listo=true; res(true); } })
+     .catch(err=>{ writeErr(err); if(!listo){ listo=true; res(false); } });
+    setTimeout(()=>{ if(!listo){ listo=true; S.pendAviso=true; netUpd(); res(true); } }, 2500);
+  });
+}
+function mutateDia(op, dia){
+  const key = dia || bog().key;
+  try{ return escribir(S.db.doc('dias/'+key).merge({fecha:key, ...op(S.db.F)})); }
+  catch(err){ writeErr(err); return Promise.resolve(false); }
 }
 const diaActivo = () => (S.viewKey < S.todayKey ? S.viewKey : bog().key);
-const addEvent = ev => mutateDia(d=>{ d.eventos.push({...ev, por:S.nombre||''}); }, diaActivo());
-const addEvents = evs => mutateDia(d=>{ d.eventos.push(...evs.map(ev=>({...ev, por:S.nombre||''}))); }, diaActivo());
-const setInicio = inicio => mutateDia(d=>{ d.inicio = inicio; d.inicioTs = Date.now(); }, diaActivo());
-const removeEvent = id => mutateDia(d=>{ d.eventos = d.eventos.filter(e=>e.id!==id); }, S.viewKey);
+const addEvent = ev => mutateDia(F=>({eventos:F.arrayUnion({...ev, por:S.nombre||''})}), diaActivo());
+const addEvents = evs => mutateDia(F=>({eventos:F.arrayUnion(...evs.map(ev=>({...ev, por:S.nombre||''})))}), diaActivo());
+const setInicio = inicio => mutateDia(()=>({inicio, inicioTs:Date.now()}), diaActivo());
+const removeEvent = id => { const e=(S.dia?.eventos||[]).find(x=>x.id===id); return e ? mutateDia(F=>({eventos:F.arrayRemove(e)}), S.viewKey) : Promise.resolve(false); };
 // hora local de Barranquilla (UTC-5) en un día dado → marca de tiempo
 function tsDe(key, hhmm){ const [y,m,d]=key.split('-').map(Number); const [hh,mi]=(hhmm||'00:00').split(':').map(Number); return Date.UTC(y,m-1,d,hh+5,mi); }
 function writeErr(err){
@@ -1270,6 +1284,17 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden && mode==
 const dIn=$$('dia'); dIn.value=S.viewKey; dIn.max=S.todayKey;
 dIn.onchange=()=>{ if(dIn.value && S.db){ S.viewKey=dIn.value; subDia(); render(); } };
 
+/* ---------- estado de conexión ---------- */
+function netUpd(){
+  const n=$$('net'); if(!n) return;
+  const off=!navigator.onLine, pend=S.pend||S.pendAviso;
+  n.hidden = !off && !pend;
+  n.className = 'net' + (off?' off':'');
+  n.textContent = off ? (pend ? 'Sin conexión · registros guardados en este equipo, se envían al volver la red' : 'Sin conexión · mostrando últimos datos recibidos')
+                      : 'Enviando registros…';
+}
+addEventListener('online', netUpd); addEventListener('offline', netUpd);
+
 /* ---------- suscripciones ---------- */
 function subDia(){
   if(S.unsubDia) S.unsubDia();
@@ -1277,7 +1302,10 @@ function subDia(){
   const key=S.viewKey;
   S.unsubDia = S.db.doc('dias/'+key).onSnapshot(snap=>{
     if(key!==S.viewKey) return;
+    const antes = S.dia;
     S.dia = snap.exists?snap.data():null; S.dbState='ok';
+    S.pend = snap.pend; if(!snap.pend) S.pendAviso=false; netUpd();
+    if(antes && S.dia && JSON.stringify(antes)===JSON.stringify(S.dia)) return;   // solo cambió el estado de sincronización
     if(S.user) render();
     if(S.viewKey===S.todayKey && $$('pInvD') && !$$('pInvD').open) fillInv();
   }, ()=>{ S.dbState='sin-db'; if(S.user) render(); });
@@ -1307,12 +1335,14 @@ let FBX = null;
 function makeDB(fs, db){
   const snapDoc = s => ({id:s.id, exists:s.exists(), data:()=>s.data()});
   return {
+    F:{arrayUnion:fs.arrayUnion, arrayRemove:fs.arrayRemove},
     doc(p){
       const ref = fs.doc(db, ...p.split('/'));
       return {
         get: async () => snapDoc(await fs.getDoc(ref)),
         set: d => fs.setDoc(ref, d),
-        onSnapshot: (n, e) => fs.onSnapshot(ref, s => n(snapDoc(s)), e)
+        merge: d => fs.setDoc(ref, d, {merge:true}),
+        onSnapshot: (n, e) => fs.onSnapshot(ref, {includeMetadataChanges:true}, s => n({...snapDoc(s), pend:!!s.metadata?.hasPendingWrites, cache:!!s.metadata?.fromCache}), e)
       };
     },
     collection(p){
@@ -1333,7 +1363,9 @@ async function loadFirebase(){
   const app = appM.initializeApp(firebaseConfig);
   const auth = authM.getAuth(app);
   await authM.setPersistence(auth, authM.browserLocalPersistence);
-  const db = fsM.getFirestore(app);
+  let db;
+  try{ db = fsM.initializeFirestore(app, {localCache: fsM.persistentLocalCache({tabManager: fsM.persistentMultipleTabManager()})}); }
+  catch(e){ db = fsM.getFirestore(app); }
   return {auth, authM, fsM, db};
 }
 
@@ -1398,6 +1430,23 @@ $$('salir').onclick = async () => { try{ await FBX.authM.signOut(FBX.auth); }cat
   }catch(e){ $$('login').hidden=false; lerr('No se pudo cargar. Revisa la conexión a internet.'); }
 })();
 
+
+/* ---------- versión nueva y mantenimiento ---------- */
+// Cuando se sube un index.html nuevo a GitHub, los equipos abiertos se actualizan solos
+// (sin Ctrl+F5) en cuanto nadie esté escribiendo. El TV además se recarga cada madrugada.
+const hashTxt = t => { let h=0; for(let i=0;i<t.length;i++) h=(h*31+t.charCodeAt(i))|0; return h; };
+let verIni=null;
+const libre = () => { const ae=document.activeElement; return !(ae && /INPUT|SELECT|TEXTAREA/.test(ae.tagName)) && !S.draft?.dirty && !S.pend && !S.pendAviso; };
+async function revisarVersion(){
+  try{
+    const r = await fetch(location.pathname+'?v='+Date.now(), {cache:'no-store'}); if(!r.ok) return;
+    const h = hashTxt(await r.text());
+    if(verIni===null){ verIni=h; return; }
+    if(h!==verIni && libre()) location.reload();
+  }catch(e){}
+}
+revisarVersion(); setInterval(revisarVersion, 5*60000);
+setInterval(()=>{ const b=bog(); if(S.rol==='tv' && b.min>=300 && b.min<330 && performance.now()>60*60000 && libre()) location.reload(); }, 60000);
 
 /* ---------- reloj ---------- */
 setInterval(()=>{
