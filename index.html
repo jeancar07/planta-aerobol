@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Planta Aerobol</title>
 <meta name="theme-color" content="#0B111B">
-<style>html,body{margin:0}[hidden]{display:none!important}*{box-sizing:border-box}html.rol-tv .seg,html.rol-tv #dia,html.rol-tv #turnoSel{display:none!important}
+<style>html,body{margin:0}[hidden]{display:none!important}*{box-sizing:border-box}html.rol-tv .seg,html.rol-tv #dia,html.rol-tv #turnoSel,html.rol-tv #pie{display:none!important}
 
 /* ── tablero del TV ── */
 html.rol-tv{--gold:#D2AA6A;--tv-bg:radial-gradient(120% 80% at 15% 0%,#14233a 0%,#0B111B 55%,#080c14 100%);--card-a:rgb(24 36 56 / .92);--card-b:rgb(15 23 37 / .92);--card-line:rgb(255 255 255 / .09);--card-shadow:0 30px 60px -40px rgb(0 0 0 / .9);--num-a:#fff;--num-b:#c9d4e4;--track:rgb(255 255 255 / .08);--chip:rgb(255 255 255 / .06);--bad-txt:#ff9b97}
@@ -57,9 +57,9 @@ html.rol-tv .userchip:hover,html.rol-tv #fs:hover,html.rol-tv #salir:hover{opaci
 .tvm{position:relative;overflow:hidden;padding:min(1.2vw,1.9vh) min(1.8vw,2.8vh);display:flex;flex-direction:column;gap:min(.4vw,.6vh)}
 .tvm::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--idle)}
 .tvm.ok::before{background:var(--ok);box-shadow:0 0 22px 2px rgb(61 190 124 / .45)}
-.tvm.bad{background:linear-gradient(180deg,color-mix(in srgb,var(--bad) 16%,var(--card-a)),color-mix(in srgb,var(--bad) 6%,var(--card-b)));border-color:rgb(255 95 90 / .45);animation:tvAlarm 1.8s ease-in-out infinite}
+.tvm.bad{background:linear-gradient(180deg,rgb(255 95 90 / .16),rgb(255 95 90 / .06));border-color:rgb(255 95 90 / .45);animation:tvAlarm 1.8s ease-in-out infinite}
 .tvm.bad::before{background:var(--bad)}
-@keyframes tvAlarm{50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--bad) 18%,transparent),var(--card-shadow)}}
+@keyframes tvAlarm{50%{box-shadow:0 0 0 6px rgb(220 70 60 / .18),var(--card-shadow)}}
 .tvm-h{display:flex;justify-content:space-between;align-items:center;gap:.8rem}
 .tvm-name{font-family:var(--display);font-weight:700;font-size:min(2vw,3.4vh)}
 .tvm-st{display:inline-flex;align-items:center;gap:.5em;font-size:clamp(.8rem,1vw,1.1rem);font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.45em .9em;border-radius:999px;background:var(--chip);color:var(--muted)}
@@ -333,7 +333,7 @@ html.tv .kpi.lead{background:var(--accent-soft);color:var(--ink);border-color:va
 #histChart rect{transition:opacity .2s}#histChart rect:hover{opacity:.8}
 .bgfx{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
 .app{position:relative;z-index:1}
-.kpi,.card{background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.kpi,.card{background:var(--surface);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .kpi.lead{backdrop-filter:none}
 
 /* tarjetas: luz que sigue el cursor */
@@ -421,22 +421,47 @@ tbody tr:hover td:first-child{padding-left:14px}
 @keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
 .lbrand{margin-bottom:10px}
 
-/* ── paletas pastel (se eligen con el punto de abajo a la derecha; se guardan en cada equipo) ── */
-:root[data-pal="beige"]{color-scheme:light;--bg:#F2EBDD;--surface:#FBF8F2;--surface-2:#EAE0CD;--ink:#2E2A24;--muted:#6F6556;--line:#DDD2BE;--accent:#7A5A2E;--accent-soft:#F0E4CC;--navy:#2E2A24;--ok:#2E7D4F;--ok-bg:#D9EFE1;--bad:#B3392F;--bad-bg:#F6DCD8;--warn:#8A5A00;--warn-bg:#F5E7C8;--idle:#9A958C;--chart:#8C6A3A;--ref:#6F6556;--logo-navy:#1D3050;--logo-line:#B9C6D8;--logo-gold:#B8904F;--logo-spark:#DCE6F2;--logo-mist:#9DB0C8;--gold:#9A6F2A;--tv-bg:radial-gradient(120% 80% at 15% 0%,#FBF6EC 0%,#F2EBDD 55%,#EADFCB 100%);--card-a:#FBF8F2;--card-b:color-mix(in srgb,#FBF8F2 70%,#F2EBDD);--card-line:#DDD2BE;--card-shadow:0 22px 44px -32px rgb(40 30 20 / .35);--num-a:#2E2A24;--num-b:color-mix(in srgb,#2E2A24 72%,#7A5A2E);--track:rgb(0 0 0 / .08);--chip:rgb(0 0 0 / .05);--bad-txt:#B3392F}
-:root[data-pal="blanco"]{color-scheme:light;--bg:#F4F5F7;--surface:#FFFFFF;--surface-2:#EBEDF1;--ink:#1B2330;--muted:#5E6878;--line:#DDE1E7;--accent:#3F5F8F;--accent-soft:#E6ECF5;--navy:#1B2330;--ok:#2E7D4F;--ok-bg:#D9EFE1;--bad:#B3392F;--bad-bg:#F6DCD8;--warn:#8A5A00;--warn-bg:#F5E7C8;--idle:#9A958C;--chart:#3F5F8F;--ref:#5E6878;--logo-navy:#1D3050;--logo-line:#B9C6D8;--logo-gold:#B8904F;--logo-spark:#DCE6F2;--logo-mist:#9DB0C8;--gold:#94702E;--tv-bg:radial-gradient(120% 80% at 15% 0%,#FFFFFF 0%,#F4F5F7 55%,#E9ECF1 100%);--card-a:#FFFFFF;--card-b:color-mix(in srgb,#FFFFFF 70%,#F4F5F7);--card-line:#DDE1E7;--card-shadow:0 22px 44px -32px rgb(40 30 20 / .35);--num-a:#1B2330;--num-b:color-mix(in srgb,#1B2330 72%,#3F5F8F);--track:rgb(0 0 0 / .08);--chip:rgb(0 0 0 / .05);--bad-txt:#B3392F}
-:root[data-pal="rosa"]{color-scheme:light;--bg:#F8E8EC;--surface:#FFF7F9;--surface-2:#F1D9DF;--ink:#3A2329;--muted:#7A5C64;--line:#EACBD3;--accent:#9E4A62;--accent-soft:#F6DCE4;--navy:#3A2329;--ok:#2E7D4F;--ok-bg:#D9EFE1;--bad:#B3392F;--bad-bg:#F6DCD8;--warn:#8A5A00;--warn-bg:#F5E7C8;--idle:#9A958C;--chart:#B05C74;--ref:#7A5C64;--logo-navy:#1D3050;--logo-line:#B9C6D8;--logo-gold:#B8904F;--logo-spark:#DCE6F2;--logo-mist:#9DB0C8;--gold:#97683A;--tv-bg:radial-gradient(120% 80% at 15% 0%,#FFF4F6 0%,#F8E8EC 55%,#F1D7DE 100%);--card-a:#FFF7F9;--card-b:color-mix(in srgb,#FFF7F9 70%,#F8E8EC);--card-line:#EACBD3;--card-shadow:0 22px 44px -32px rgb(40 30 20 / .35);--num-a:#3A2329;--num-b:color-mix(in srgb,#3A2329 72%,#9E4A62);--track:rgb(0 0 0 / .08);--chip:rgb(0 0 0 / .05);--bad-txt:#B3392F}
-:root[data-pal="menta"]{color-scheme:light;--bg:#E3F2EA;--surface:#F6FCF8;--surface-2:#D3EADD;--ink:#1F3329;--muted:#577064;--line:#C6E0D2;--accent:#2F7458;--accent-soft:#D7EEE2;--navy:#1F3329;--ok:#2E7D4F;--ok-bg:#D9EFE1;--bad:#B3392F;--bad-bg:#F6DCD8;--warn:#8A5A00;--warn-bg:#F5E7C8;--idle:#9A958C;--chart:#3C8A68;--ref:#577064;--logo-navy:#1D3050;--logo-line:#B9C6D8;--logo-gold:#B8904F;--logo-spark:#DCE6F2;--logo-mist:#9DB0C8;--gold:#86692B;--tv-bg:radial-gradient(120% 80% at 15% 0%,#F3FBF6 0%,#E3F2EA 55%,#D2EADC 100%);--card-a:#F6FCF8;--card-b:color-mix(in srgb,#F6FCF8 70%,#E3F2EA);--card-line:#C6E0D2;--card-shadow:0 22px 44px -32px rgb(40 30 20 / .35);--num-a:#1F3329;--num-b:color-mix(in srgb,#1F3329 72%,#2F7458);--track:rgb(0 0 0 / .08);--chip:rgb(0 0 0 / .05);--bad-txt:#B3392F}
-:root[data-pal="lavanda"]{color-scheme:light;--bg:#ECE7F6;--surface:#FBF9FE;--surface-2:#DFD8EF;--ink:#2A2440;--muted:#675F80;--line:#D6CDEA;--accent:#5E4E9C;--accent-soft:#E5DEF5;--navy:#2A2440;--ok:#2E7D4F;--ok-bg:#D9EFE1;--bad:#B3392F;--bad-bg:#F6DCD8;--warn:#8A5A00;--warn-bg:#F5E7C8;--idle:#9A958C;--chart:#6F5FB0;--ref:#675F80;--logo-navy:#1D3050;--logo-line:#B9C6D8;--logo-gold:#B8904F;--logo-spark:#DCE6F2;--logo-mist:#9DB0C8;--gold:#8C6B33;--tv-bg:radial-gradient(120% 80% at 15% 0%,#F8F5FD 0%,#ECE7F6 55%,#DED6F0 100%);--card-a:#FBF9FE;--card-b:color-mix(in srgb,#FBF9FE 70%,#ECE7F6);--card-line:#D6CDEA;--card-shadow:0 22px 44px -32px rgb(40 30 20 / .35);--num-a:#2A2440;--num-b:color-mix(in srgb,#2A2440 72%,#5E4E9C);--track:rgb(0 0 0 / .08);--chip:rgb(0 0 0 / .05);--bad-txt:#B3392F}
-:root[data-pal="celeste"]{color-scheme:light;--bg:#E3EEF7;--surface:#F7FBFE;--surface-2:#D3E3F0;--ink:#1C2C3C;--muted:#586A7C;--line:#C8DAEA;--accent:#2F6390;--accent-soft:#D9E8F5;--navy:#1C2C3C;--ok:#2E7D4F;--ok-bg:#D9EFE1;--bad:#B3392F;--bad-bg:#F6DCD8;--warn:#8A5A00;--warn-bg:#F5E7C8;--idle:#9A958C;--chart:#3A73A6;--ref:#586A7C;--logo-navy:#1D3050;--logo-line:#B9C6D8;--logo-gold:#B8904F;--logo-spark:#DCE6F2;--logo-mist:#9DB0C8;--gold:#8C6B33;--tv-bg:radial-gradient(120% 80% at 15% 0%,#F4F9FD 0%,#E3EEF7 55%,#D2E2EF 100%);--card-a:#F7FBFE;--card-b:color-mix(in srgb,#F7FBFE 70%,#E3EEF7);--card-line:#C8DAEA;--card-shadow:0 22px 44px -32px rgb(40 30 20 / .35);--num-a:#1C2C3C;--num-b:color-mix(in srgb,#1C2C3C 72%,#2F6390);--track:rgb(0 0 0 / .08);--chip:rgb(0 0 0 / .05);--bad-txt:#B3392F}
-:root[data-pal] .tv-brand img{box-shadow:0 8px 20px -12px rgb(0 0 0 / .45);outline:1px solid var(--line)}
+/* ── paletas pastel: se eligen con el botón «Colores» al final de la página; cada equipo guarda la suya.
+   Sin color-mix ni efectos que los navegadores de TV viejos no soportan. ── */
+:root[data-pal="beige"]{color-scheme:light;--bg:#F7F1E6;--surface:#FFFCF6;--surface-2:#EFE6D6;--ink:#2F2A22;--muted:#655B4C;--line:#E3D8C4;--accent:#7E5F36;--accent-soft:#F3E8D5;--pri:#EAD9BA;--navy:#2F2A22;--ok:#2C7650;--ok-bg:#DCEFE3;--bad:#B0413A;--bad-bg:#F8E0DD;--warn:#86590C;--warn-bg:#F6E9CC;--idle:#9C978F;--chart:#7E5F36;--ref:#655B4C;--logo-navy:#1D3050;--logo-line:#B9C6D8;--logo-gold:#B8904F;--logo-spark:#DCE6F2;--logo-mist:#9DB0C8;--gold:#7E5F36;--tv-bg:#F7F1E6;--card-a:#FFFCF6;--card-b:#FFFCF6;--card-line:#E3D8C4;--card-shadow:0 14px 30px -24px rgb(40 30 20 / .30);--num-a:#2F2A22;--num-b:#2F2A22;--track:#EFE6D6;--chip:#EFE6D6;--bad-txt:#B0413A;--bad-card:#FBEAE8;--bad-line:#E9B9B4}
+:root[data-pal="arena"]{color-scheme:light;--bg:#F4EEE6;--surface:#FDFAF6;--surface-2:#EAE1D5;--ink:#2E2A26;--muted:#625A50;--line:#DDD2C3;--accent:#73604C;--accent-soft:#EFE5D8;--pri:#E3D3BF;--navy:#2E2A26;--ok:#2C7650;--ok-bg:#DCEFE3;--bad:#B0413A;--bad-bg:#F8E0DD;--warn:#86590C;--warn-bg:#F6E9CC;--idle:#9C978F;--chart:#73604C;--ref:#625A50;--logo-navy:#1D3050;--logo-line:#B9C6D8;--logo-gold:#B8904F;--logo-spark:#DCE6F2;--logo-mist:#9DB0C8;--gold:#73604C;--tv-bg:#F4EEE6;--card-a:#FDFAF6;--card-b:#FDFAF6;--card-line:#DDD2C3;--card-shadow:0 14px 30px -24px rgb(40 30 20 / .30);--num-a:#2E2A26;--num-b:#2E2A26;--track:#EAE1D5;--chip:#EAE1D5;--bad-txt:#B0413A;--bad-card:#FBEAE8;--bad-line:#E9B9B4}
+:root[data-pal="blanco"]{color-scheme:light;--bg:#F7F8FA;--surface:#FFFFFF;--surface-2:#EEF0F3;--ink:#1E2430;--muted:#596272;--line:#E1E4E9;--accent:#42608A;--accent-soft:#E9EEF6;--pri:#D9E3F1;--navy:#1E2430;--ok:#2C7650;--ok-bg:#DCEFE3;--bad:#B0413A;--bad-bg:#F8E0DD;--warn:#86590C;--warn-bg:#F6E9CC;--idle:#9C978F;--chart:#42608A;--ref:#596272;--logo-navy:#1D3050;--logo-line:#B9C6D8;--logo-gold:#B8904F;--logo-spark:#DCE6F2;--logo-mist:#9DB0C8;--gold:#42608A;--tv-bg:#F7F8FA;--card-a:#FFFFFF;--card-b:#FFFFFF;--card-line:#E1E4E9;--card-shadow:0 14px 30px -24px rgb(40 30 20 / .30);--num-a:#1E2430;--num-b:#1E2430;--track:#EEF0F3;--chip:#EEF0F3;--bad-txt:#B0413A;--bad-card:#FBEAE8;--bad-line:#E9B9B4}
+:root[data-pal="perla"]{color-scheme:light;--bg:#F2F3F5;--surface:#FAFAFB;--surface-2:#E7E9EC;--ink:#22262C;--muted:#5A6069;--line:#D9DCE1;--accent:#535B67;--accent-soft:#E9EBEE;--pri:#DCDFE4;--navy:#22262C;--ok:#2C7650;--ok-bg:#DCEFE3;--bad:#B0413A;--bad-bg:#F8E0DD;--warn:#86590C;--warn-bg:#F6E9CC;--idle:#9C978F;--chart:#535B67;--ref:#5A6069;--logo-navy:#1D3050;--logo-line:#B9C6D8;--logo-gold:#B8904F;--logo-spark:#DCE6F2;--logo-mist:#9DB0C8;--gold:#535B67;--tv-bg:#F2F3F5;--card-a:#FAFAFB;--card-b:#FAFAFB;--card-line:#D9DCE1;--card-shadow:0 14px 30px -24px rgb(40 30 20 / .30);--num-a:#22262C;--num-b:#22262C;--track:#E7E9EC;--chip:#E7E9EC;--bad-txt:#B0413A;--bad-card:#FBEAE8;--bad-line:#E9B9B4}
+:root[data-pal="rosa"]{color-scheme:light;--bg:#FBF0F2;--surface:#FFF9FA;--surface-2:#F4E2E6;--ink:#33252A;--muted:#6A565C;--line:#EAD3D9;--accent:#97526A;--accent-soft:#F7E3E9;--pri:#F2CFD9;--navy:#33252A;--ok:#2C7650;--ok-bg:#DCEFE3;--bad:#B0413A;--bad-bg:#F8E0DD;--warn:#86590C;--warn-bg:#F6E9CC;--idle:#9C978F;--chart:#97526A;--ref:#6A565C;--logo-navy:#1D3050;--logo-line:#B9C6D8;--logo-gold:#B8904F;--logo-spark:#DCE6F2;--logo-mist:#9DB0C8;--gold:#97526A;--tv-bg:#FBF0F2;--card-a:#FFF9FA;--card-b:#FFF9FA;--card-line:#EAD3D9;--card-shadow:0 14px 30px -24px rgb(40 30 20 / .30);--num-a:#33252A;--num-b:#33252A;--track:#F4E2E6;--chip:#F4E2E6;--bad-txt:#B0413A;--bad-card:#FBEAE8;--bad-line:#E9B9B4}
+:root[data-pal="durazno"]{color-scheme:light;--bg:#FCF1EA;--surface:#FFFAF6;--surface-2:#F5E3D7;--ink:#33271F;--muted:#6D5A4D;--line:#EBD3C3;--accent:#975A36;--accent-soft:#FAE5D8;--pri:#F6D2BC;--navy:#33271F;--ok:#2C7650;--ok-bg:#DCEFE3;--bad:#B0413A;--bad-bg:#F8E0DD;--warn:#86590C;--warn-bg:#F6E9CC;--idle:#9C978F;--chart:#975A36;--ref:#6D5A4D;--logo-navy:#1D3050;--logo-line:#B9C6D8;--logo-gold:#B8904F;--logo-spark:#DCE6F2;--logo-mist:#9DB0C8;--gold:#975A36;--tv-bg:#FCF1EA;--card-a:#FFFAF6;--card-b:#FFFAF6;--card-line:#EBD3C3;--card-shadow:0 14px 30px -24px rgb(40 30 20 / .30);--num-a:#33271F;--num-b:#33271F;--track:#F5E3D7;--chip:#F5E3D7;--bad-txt:#B0413A;--bad-card:#FBEAE8;--bad-line:#E9B9B4}
+:root[data-pal="menta"]{color-scheme:light;--bg:#EEF7F2;--surface:#F9FDFB;--surface-2:#DFF0E6;--ink:#1F2E27;--muted:#52645B;--line:#CDE4D7;--accent:#35704F;--accent-soft:#E0F2E8;--pri:#CBE8D7;--navy:#1F2E27;--ok:#2C7650;--ok-bg:#DCEFE3;--bad:#B0413A;--bad-bg:#F8E0DD;--warn:#86590C;--warn-bg:#F6E9CC;--idle:#9C978F;--chart:#35704F;--ref:#52645B;--logo-navy:#1D3050;--logo-line:#B9C6D8;--logo-gold:#B8904F;--logo-spark:#DCE6F2;--logo-mist:#9DB0C8;--gold:#35704F;--tv-bg:#EEF7F2;--card-a:#F9FDFB;--card-b:#F9FDFB;--card-line:#CDE4D7;--card-shadow:0 14px 30px -24px rgb(40 30 20 / .30);--num-a:#1F2E27;--num-b:#1F2E27;--track:#DFF0E6;--chip:#DFF0E6;--bad-txt:#B0413A;--bad-card:#FBEAE8;--bad-line:#E9B9B4}
+:root[data-pal="salvia"]{color-scheme:light;--bg:#F0F3EC;--surface:#FAFCF8;--surface-2:#E3E9DC;--ink:#252B21;--muted:#586152;--line:#D3DCCB;--accent:#566C48;--accent-soft:#E6EDDF;--pri:#D6E2CB;--navy:#252B21;--ok:#2C7650;--ok-bg:#DCEFE3;--bad:#B0413A;--bad-bg:#F8E0DD;--warn:#86590C;--warn-bg:#F6E9CC;--idle:#9C978F;--chart:#566C48;--ref:#586152;--logo-navy:#1D3050;--logo-line:#B9C6D8;--logo-gold:#B8904F;--logo-spark:#DCE6F2;--logo-mist:#9DB0C8;--gold:#566C48;--tv-bg:#F0F3EC;--card-a:#FAFCF8;--card-b:#FAFCF8;--card-line:#D3DCCB;--card-shadow:0 14px 30px -24px rgb(40 30 20 / .30);--num-a:#252B21;--num-b:#252B21;--track:#E3E9DC;--chip:#E3E9DC;--bad-txt:#B0413A;--bad-card:#FBEAE8;--bad-line:#E9B9B4}
+:root[data-pal="lavanda"]{color-scheme:light;--bg:#F3F1FA;--surface:#FCFBFF;--surface-2:#E7E3F4;--ink:#29253A;--muted:#5F5A74;--line:#D9D3EC;--accent:#625399;--accent-soft:#EAE6F8;--pri:#DCD5F2;--navy:#29253A;--ok:#2C7650;--ok-bg:#DCEFE3;--bad:#B0413A;--bad-bg:#F8E0DD;--warn:#86590C;--warn-bg:#F6E9CC;--idle:#9C978F;--chart:#625399;--ref:#5F5A74;--logo-navy:#1D3050;--logo-line:#B9C6D8;--logo-gold:#B8904F;--logo-spark:#DCE6F2;--logo-mist:#9DB0C8;--gold:#625399;--tv-bg:#F3F1FA;--card-a:#FCFBFF;--card-b:#FCFBFF;--card-line:#D9D3EC;--card-shadow:0 14px 30px -24px rgb(40 30 20 / .30);--num-a:#29253A;--num-b:#29253A;--track:#E7E3F4;--chip:#E7E3F4;--bad-txt:#B0413A;--bad-card:#FBEAE8;--bad-line:#E9B9B4}
+:root[data-pal="celeste"]{color-scheme:light;--bg:#EEF5FA;--surface:#FAFDFF;--surface-2:#DFEBF4;--ink:#1F2B36;--muted:#536476;--line:#CCDDEA;--accent:#36668C;--accent-soft:#E2EEF8;--pri:#CFE2F2;--navy:#1F2B36;--ok:#2C7650;--ok-bg:#DCEFE3;--bad:#B0413A;--bad-bg:#F8E0DD;--warn:#86590C;--warn-bg:#F6E9CC;--idle:#9C978F;--chart:#36668C;--ref:#536476;--logo-navy:#1D3050;--logo-line:#B9C6D8;--logo-gold:#B8904F;--logo-spark:#DCE6F2;--logo-mist:#9DB0C8;--gold:#36668C;--tv-bg:#EEF5FA;--card-a:#FAFDFF;--card-b:#FAFDFF;--card-line:#CCDDEA;--card-shadow:0 14px 30px -24px rgb(40 30 20 / .30);--num-a:#1F2B36;--num-b:#1F2B36;--track:#DFEBF4;--chip:#DFEBF4;--bad-txt:#B0413A;--bad-card:#FBEAE8;--bad-line:#E9B9B4}
+:root[data-pal] body,:root[data-pal].rol-tv body{background:var(--bg)}
+:root[data-pal] .kpi,:root[data-pal] .card{background:var(--surface);backdrop-filter:none;-webkit-backdrop-filter:none}
+:root[data-pal] .kpi.lead,:root[data-pal].tv .kpi.lead{background:var(--pri);color:var(--ink);border-color:var(--accent)}
+:root[data-pal] .kpi.lead .lbl,:root[data-pal] .kpi.lead .sub,:root[data-pal] .kpi.lead .val small{opacity:1;color:var(--muted)}
+:root[data-pal] .btn.primary{background:var(--pri);border-color:var(--accent);color:var(--ink)}
+:root[data-pal] .btn.primary:disabled{opacity:.55}
+:root[data-pal] .tv-num,:root[data-pal] .tv-num small{background:none;color:var(--ink);-webkit-text-fill-color:currentColor}
+:root[data-pal] .tv-num small{color:var(--muted);-webkit-text-fill-color:var(--muted)}
+:root[data-pal] .tvm.bad{background:var(--bad-card);border-color:var(--bad-line)}
+:root[data-pal] .tv-brand img{box-shadow:0 6px 16px -10px rgb(0 0 0 / .35);outline:1px solid var(--line)}
 :root[data-pal] .tvm.ok::before{box-shadow:none}
 :root[data-pal] .tr-fg{filter:none}
-.paldot{position:fixed;right:10px;bottom:10px;z-index:70;width:12px;height:12px;border-radius:50%;border:1px solid var(--line);background:conic-gradient(#F2EBDD 0 25%,#F8E8EC 0 50%,#E3F2EA 0 75%,#E3EEF7 0);opacity:.45;cursor:pointer;padding:0}
-.paldot:hover,.paldot:focus-visible{opacity:1;transform:scale(1.4)}
-.palpop{position:fixed;right:10px;bottom:30px;z-index:71;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:10px;box-shadow:0 18px 40px -18px rgb(0 0 0 / .45);display:grid;grid-template-columns:repeat(4,auto);gap:8px}
-.palpop button{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;color:var(--ink);font:inherit;font-size:.72rem;cursor:pointer;padding:4px;border-radius:8px}
-.palpop button i{width:28px;height:28px;border-radius:50%;border:1px solid rgb(0 0 0 / .15);display:block}
-.palpop button[aria-pressed=true]{background:var(--accent-soft);outline:2px solid var(--accent)}
+:root[data-pal] .tv-hero::after{display:none}
+:root[data-pal] .bgfx{opacity:.5}
+/* botón Colores y ventana de colores */
+.pie{display:flex;justify-content:center;padding:18px 0 calc(8px + env(safe-area-inset-bottom,0px))}
+.palbtn{display:inline-flex;align-items:center;gap:8px;background:var(--surface);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:8px 16px;font:inherit;font-size:.85rem;cursor:pointer;opacity:.8;min-height:38px}
+.palbtn:hover,.palbtn:focus-visible{opacity:1;color:var(--ink);border-color:var(--accent)}
+.palbtn i{width:16px;height:16px;border-radius:50%;background:conic-gradient(#EAD9BA 0 25%,#F2CFD9 0 50%,#CBE8D7 0 75%,#CFE2F2 0);border:1px solid rgb(0 0 0 / .15)}
+.tv-last .palbtn{margin-left:auto;font-size:min(.9vw,1.5vh);padding:.4em 1em;min-height:0;opacity:.6}
+.palmodal{position:fixed;inset:0;z-index:90;background:rgb(0 0 0 / .35);display:flex;align-items:center;justify-content:center;padding:16px}
+.palbox{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:18px;width:min(560px,100%);max-height:90vh;overflow:auto;box-shadow:0 30px 60px -20px rgb(0 0 0 / .5)}
+.palbox h3{margin:0 0 4px;font-size:1.05rem}
+.palbox p{margin:0 0 14px;color:var(--muted);font-size:.85rem}
+.palgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px}
+.palgrid button{display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:1px solid transparent;border-radius:12px;color:var(--ink);font:inherit;font-size:.8rem;cursor:pointer;padding:10px 4px}
+.palgrid button i{width:46px;height:46px;border-radius:12px;border:1px solid rgb(0 0 0 / .15);display:block}
+.palgrid button[aria-pressed=true]{border-color:var(--accent);background:var(--surface-2);font-weight:700}
+.palbox .cerrar{margin-top:14px;width:100%}
 .pers-grid{display:grid;grid-template-columns:1fr 6rem;gap:6px 8px;align-items:center;font-size:.85rem;margin-bottom:8px}
 </style>
 </head>
@@ -516,11 +541,15 @@ tbody tr:hover td:first-child{padding-left:14px}
       <section class="card" id="histCard"><h2>Historial de días <span class="aside" id="histAside"></span></h2><div class="chart-wrap" id="histChart"></div><div class="tbl-wrap" id="hist"></div></section>
     </div>
   </div>
+  <footer class="pie" id="pie"><button class="palbtn" type="button" data-pal-open><i></i>Colores</button></footer>
 </div>
 <div class="toast" id="toast" hidden></div>
 <div class="net" id="net" hidden role="status"></div>
-<button class="paldot" id="paldot" type="button" aria-label="Cambiar colores de la pantalla" title="Colores"></button>
-<div class="palpop" id="palpop" hidden role="dialog" aria-label="Colores de la pantalla"></div>
+<div class="palmodal" id="palmodal" hidden><div class="palbox" role="dialog" aria-modal="true" aria-labelledby="palT">
+  <h3 id="palT">Colores de esta pantalla</h3><p>Se guarda solo en este equipo. Cada persona puede tener los suyos.</p>
+  <div class="palgrid" id="palgrid"></div>
+  <button class="btn cerrar" type="button" id="palClose">Listo</button>
+</div></div>
 <script type="module">
 const firebaseConfig = {
   apiKey: "AIzaSyD-7XXfvPJIwRzICKsbI2ZeQ4oa14AQzIU",
@@ -730,7 +759,7 @@ function renderTV(R){
   const cajas = Math.floor(R.total/UXC), sueltas = R.total%UXC;
   const pct = meta ? Math.min(100, R.total/meta*100) : 0;
   const que = e => e.tipo==='prod'
-      ? (e.acum!=null ? `reportó <b>${fmtCaj(e.acum)}</b> en ${esc(maqName(e.maq))}` : `reportó <b>${nf0.format(e.unidades)}</b> envases en ${esc(maqName(e.maq))}`)
+      ? `reportó <b>+${fmtCaj(e.unidades)}</b> en ${esc(maqName(e.maq))} · van ${fmtCaj(e.totalMaq)}`
       : e.tipo==='falla' ? `reportó <b class="tv-bad">falla</b> en ${esc(maqName(e.maq))}${e.nota?` · ${esc(e.nota)}`:''}`
       : `reanudó ${esc(maqName(e.maq))}`;
   const last = R.ev[R.ev.length-1];
@@ -799,7 +828,7 @@ function renderTV(R){
       <div class="tv-stat"><span class="tv-lbl">Turno anterior${prev?` · ${TN(prev.t)} ${esc(fmtCorta(prev.fecha))}`:''}</span><div class="tv-val">${prev?nf0.format(prev.und):'—'}<small>${prev?`envases · ${nf0.format(prev.cajas)} cajas`:'sin registros'}</small></div></div>
     </section>
     <section class="tv-maqs">${maqs}</section>
-    <footer class="tv-last"><i class="livedot"></i><span class="tv-lbl">Última actualización</span><span class="tv-last-t">${lastTxt}</span></footer>`;
+    <footer class="tv-last"><i class="livedot"></i><span class="tv-lbl">Última actualización</span><span class="tv-last-t">${lastTxt}</span><button class="palbtn" type="button" data-pal-open><i></i>Colores</button></footer>`;
   runCounters(tb);
   const fg = tb.querySelector('.tr-fg');
   if(fg){ requestAnimationFrame(()=>requestAnimationFrame(()=>{ fg.style.strokeDashoffset = fg.dataset.off; })); S.tvOff = +fg.dataset.off; }
@@ -1137,7 +1166,7 @@ function renderLog(R){
     let txt;
     if(e.tipo==='prod') txt = e.acum!=null
       ? `<b>${esc(maqName(e.maq))}</b>: van <b class="num">${fmtCaj(e.acum)}</b> (${nf0.format(e.acum)} und) <span class="muted">· +${nf0.format(e.unidades)} und desde el reporte anterior</span>`
-      : `<b>${esc(maqName(e.maq))}</b> reportó ${e.cajas} caja${e.cajas===1?'':'s'}${e.sueltas?` + ${e.sueltas} und`:''} = <b class="num">${nf0.format(e.unidades)}</b> und`;
+      : `<b>${esc(maqName(e.maq))}</b>: +<b class="num">${fmtCaj(e.unidades)}</b> <span class="muted">· van ${fmtCaj(e.totalMaq)} (${nf0.format(e.totalMaq)} und)</span>`;
     else if(e.tipo==='falla') txt = `<span class="t-falla">Falla en ${esc(maqName(e.maq))}</span>${e.nota?` <span class="muted">· ${esc(e.nota)}</span>`:''}`;
     else txt = `<span class="t-reanuda">${esc(maqName(e.maq))} reanudó</span>`;
     const del = canDel ? (S.confirmDel===e.id ? `<button class="btn danger" data-del="${esc(e.id)}">Confirmar anular</button>` : `<button class="btn" data-ask="${esc(e.id)}">Anular</button>`) : '';
@@ -1165,14 +1194,15 @@ function renderPanel(R){
       ${pasado ? `<p class="calc" style="margin:0">Escribe cuántas cajas iban en total en el turno a cada hora. Puedes cargar solo el total al final del turno o varios cortes.</p>
       <div class="field"><label for="pHora">Hora del reporte (turno ${TN(S.viewT)}: ${hhmm(T_INI)} – ${hhmm(T_FIN)})</label><input id="pHora" type="time" step="60" value="${S.viewT==='N'?'06:00':'18:00'}"></div>` : ''}
       <div class="field" ${maqs.length<2?'hidden':''}><label for="pMaq">Máquina</label><select id="pMaq">${maqs.map(m=>`<option value="${esc(m.id)}">${esc(m.nombre)}</option>`).join('')}</select></div>
-      <div class="field"><label for="pCajas">Total de cajas en el turno hasta ${pasado ? 'esa hora' : 'ahora'} (${UXC} und c/u)</label>
+      <div class="field"><label for="pCajas">Cajas nuevas desde el último reporte (${UXC} und c/u)</label>
         <span class="calc" id="pUlt"></span>
         <div class="stepper"><button type="button" id="pMenos" aria-label="Una caja menos">−</button><input id="pCajas" type="number" inputmode="numeric" min="0" step="1"><button type="button" id="pMas" aria-label="Una caja más">+</button></div>
       </div>
       <div class="quick"><button class="btn" data-add="5" type="button">+5</button><button class="btn" data-add="10" type="button">+10</button><button class="btn" data-add="25" type="button">+25</button><button class="btn" data-add="50" type="button">+50</button></div>
-      <div class="field"><label for="pSueltas">Unidades sueltas en ese total (sin completar caja)</label><input id="pSueltas" type="number" inputmode="numeric" min="0" max="23" step="1"></div>
+      <div class="field"><label for="pSueltas">Unidades sueltas nuevas (sin completar caja)</label><input id="pSueltas" type="number" inputmode="numeric" min="0" max="23" step="1"></div>
       <div class="calc" id="pCalc"></div>
       <button class="btn primary" id="pReg" type="button">Registrar producción</button>
+      <button class="btn" id="pUndo" type="button" hidden style="width:100%;margin-top:8px"></button>
     </div>
     <div class="block">
       <h3>Operarios por máquina · turno ${TN(S.viewT)}</h3>
@@ -1212,7 +1242,7 @@ function renderPanel(R){
     $('pMeta').value = S.cfg.meta ?? '';
     fillPers();
   }
-  if(!S.draft.dirty){ const a = repAntes(S.draft.maq, horaReporte()).total; S.draft.cajas = Math.floor(a/UXC); S.draft.sueltas = a%UXC; }
+  if(!S.draft.dirty){ S.draft.cajas = 0; S.draft.sueltas = 0; }
   if(document.activeElement!==$('pCajas')) $('pCajas').value = S.draft.cajas;
   if(document.activeElement!==$('pSueltas')) $('pSueltas').value = S.draft.sueltas || '';
   $('pMaq').value = S.draft.maq;
@@ -1225,35 +1255,35 @@ function fillPers(){ const p=persDe(S.dia); for(const m of S.cfg.maquinas){ cons
 function fillInv(){ const ini = iniDe(S.dia) || {}; for(const m of MAT){ const el=$('inv_'+m.k); if(el && document.activeElement!==el) el.value = ini[m.k]!=null ? +toD(m,ini[m.k]).toFixed(3) : ''; } }
 function horaReporte(){ return vk() < hk() ? tsDe(S.viewKey, $('pHora')?.value || (S.viewT==='N'?'06:00':'18:00'), S.viewT) : Date.now(); }
 // ¿la hora escrita cae dentro del turno que se está cargando?
+function ultimoProd(maq){ const l=normEvents(evDe(S.dia,S.viewT)).filter(e=>e.tipo==='prod' && e.maq===maq); return l[l.length-1]||null; }
 function horaEnTurno(hhmmTxt){ if(!hhmmTxt) return false; const [h,m]=hhmmTxt.split(':').map(Number); let x=h*60+m; if(S.viewT==='N' && x<=360) x+=1440; return x>=T_INI && x<=T_FIN; }
 function updCalc(){
   const ts = horaReporte();
-  const total = S.draft.cajas*UXC + (S.draft.sueltas||0);
-  const ant = repAntes(S.draft.maq, ts), sig = repDespues(S.draft.maq, ts);
-  const inc = total - ant.total;
-  $('pUlt').innerHTML = ant.ts ? `Reporte anterior: <b>${fmtCaj(ant.total)}</b> a las ${hhmm(bog(ant.ts).min)}` : 'Primer reporte del día';
+  const inc = S.draft.cajas*UXC + (S.draft.sueltas||0);
+  const ant = repAntes(S.draft.maq, ts);
+  const llevaTxt = ant.ts ? `Van <b>${fmtCaj(ant.total)}</b> en el turno (último reporte ${hhmm(bog(ant.ts).min)})` : 'Primer reporte del turno en esta máquina';
+  $('pUlt').innerHTML = llevaTxt;
   let msg = '', ok = inc > 0;
   if(vk()<hk() && !horaEnTurno($('pHora')?.value)){ ok = false; msg = `<span class="delta-down">La hora debe estar dentro del turno ${TN(S.viewT)} (${hhmm(T_INI)} – ${hhmm(T_FIN)})</span>`; }
-  else if(sig && total > sig.total){ ok = false; msg = `<span class="delta-down">No puede ser mayor que el reporte de las ${hhmm(bog(sig.ts).min)} (${fmtCaj(sig.total)})</span>`; }
-  else if(inc > 0) msg = `+<b>${nf0.format(inc)}</b> und desde el reporte anterior (${fmtCaj(inc)}) · gas <b>${nf2.format(inc*53.4/1000)}</b> kg · agua <b>${nf2.format(inc*451.725/1000)}</b> kg`;
-  else if(S.draft.dirty) msg = `<span class="delta-down">Debe ser mayor que el reporte anterior. Si el anterior estaba mal, anúlalo en la bitácora.</span>`;
+  else if(inc > 0) msg = `+<b>${fmtCaj(inc)}</b> → quedarían <b>${fmtCaj(ant.total+inc)}</b> en el turno · gas <b>${nf2.format(inc*53.4/1000)}</b> kg · agua <b>${nf2.format(inc*451.725/1000)}</b> kg`;
   $('pCalc').innerHTML = msg;
   $('pReg').disabled = !ok;
+  // botón "Anular último reporte" de la máquina elegida
+  const u = $('pUndo'); const ult = ultimoProd(S.draft.maq);
+  if(u){ u.hidden = !ult; if(ult && S.confirmUndo!==ult.id){ u.className='btn'; u.textContent = `Anular último reporte (${hhmm(bog(ult.ts).min)} · +${fmtCaj(ult.unidades)})`; } }
 }
 
 function wirePanel(){
   $('pMaq').onchange = e => { S.draft.maq = e.target.value; S.draft.dirty = false; renderPanel(compute()); };
-  if($('pHora')) $('pHora').oninput = () => { if(!S.draft.dirty){ const a=repAntes(S.draft.maq, horaReporte()).total; S.draft.cajas=Math.floor(a/UXC); S.draft.sueltas=a%UXC; $('pCajas').value=S.draft.cajas; $('pSueltas').value=S.draft.sueltas||''; } updCalc(); };
+  if($('pHora')) $('pHora').oninput = () => updCalc();
   $('pCajas').oninput = e => { S.draft.dirty = true; S.draft.cajas = Math.max(0, parseInt(e.target.value)||0); updCalc(); };
   $('pSueltas').oninput = e => { S.draft.dirty = true; S.draft.sueltas = Math.min(23, Math.max(0, parseInt(e.target.value)||0)); updCalc(); };
   $('pMenos').onclick = () => { S.draft.dirty = true; S.draft.cajas = Math.max(0, S.draft.cajas-1); $('pCajas').value=S.draft.cajas; updCalc(); };
   $('pMas').onclick = () => { S.draft.dirty = true; S.draft.cajas++; $('pCajas').value=S.draft.cajas; updCalc(); };
   $('panel').querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{ S.draft.dirty = true; S.draft.cajas += +b.dataset.add; $('pCajas').value=S.draft.cajas; updCalc(); });
   $('pReg').onclick = async () => {
-    const cajas=S.draft.cajas, sueltas=S.draft.sueltas||0, total=cajas*UXC+sueltas;
-    const ant = repAntes(S.draft.maq, horaReporte()), sig = repDespues(S.draft.maq, horaReporte());
-    const unidades = total - ant.total;
-    if(unidades<=0 || (sig && total>sig.total)){ updCalc(); return; }
+    const cajas=S.draft.cajas, sueltas=S.draft.sueltas||0, unidades=cajas*UXC+sueltas, total=unidades;
+    if(unidades<=0){ updCalc(); return; }
     const grande = unidades >= GRANDE_UND;
     if(grande && S.confirmGrande!==total){
       S.confirmGrande=total; const b=$('pReg'); b.textContent=`Confirmar: +${fmtCaj(unidades)} en un solo reporte`; b.classList.add('warn');
@@ -1265,11 +1295,22 @@ function wirePanel(){
     const pasado = vk() < hk();
     const hora = pasado ? ($('pHora')?.value || (S.viewT==='N'?'06:00':'18:00')) : null;
     if(pasado && !horaEnTurno(hora)){ updCalc(); $('pReg').disabled=false; return; }
-    const ev = {id:uid(), ts: pasado ? tsDe(S.viewKey, hora, S.viewT) : Date.now(), tipo:'prod', maq:S.draft.maq, cajas, sueltas, acum:total, unidades};
+    const ev = {id:uid(), ts: pasado ? tsDe(S.viewKey, hora, S.viewT) : Date.now(), tipo:'prod', maq:S.draft.maq, cajas, sueltas, unidades};   // se guarda lo NUEVO; el total se va sumando
     if(pasado){ ev.manual = true; ev.cargadoPor = S.nombre || ''; }
     const ok = await addEvent(ev);
-    if(ok){ const art=document.querySelector(`.mach[data-mid="${S.draft.maq}"] .lata3d`); if(art){ foam.burstAt(art); foam.confettiAt(art, 50); } S.draft.dirty=false; toast(`${pasado?'Cargado':'Registrado'}: van ${fmtCaj(total)} (+${nf0.format(unidades)} und)${pasado?` a las ${hhmm(bog(ev.ts).min)}`:''}`); }
+    if(ok){ const art=document.querySelector(`.mach[data-mid="${S.draft.maq}"] .lata3d`); if(art){ foam.burstAt(art); foam.confettiAt(art, 50); } S.draft.dirty=false; const van = normEvents(evDe(S.dia,S.viewT)).filter(e=>e.tipo==='prod'&&e.maq===ev.maq).pop()?.totalMaq; toast(`${pasado?'Cargado':'Registrado'}: +${fmtCaj(unidades)}${van!=null?` · van ${fmtCaj(van)} en el turno`:''}${pasado?` a las ${hhmm(bog(ev.ts).min)}`:''}`); }
     renderPanel(compute());
+  };
+  $('pUndo').onclick = async () => {
+    const ult = ultimoProd(S.draft.maq), b = $('pUndo'); if(!ult) return;
+    if(S.confirmUndo !== ult.id){
+      S.confirmUndo = ult.id; b.className='btn danger'; b.textContent = `Confirmar: anular +${fmtCaj(ult.unidades)} de las ${hhmm(bog(ult.ts).min)}`;
+      setTimeout(()=>{ if(S.confirmUndo===ult.id){ S.confirmUndo=null; updCalc(); } }, 5000);
+      return;
+    }
+    S.confirmUndo = null; b.disabled = true;
+    if(await removeEvent(ult.id)) toast(`Reporte anulado (+${fmtCaj(ult.unidades)} de las ${hhmm(bog(ult.ts).min)})`);
+    b.disabled = false; updCalc();
   };
   $('pEstados').onclick = async e => {
     const f = e.target.closest('[data-falla]'), r = e.target.closest('[data-reanuda]');
@@ -1367,22 +1408,25 @@ tSel.onchange=()=>irA(dIn.value || S.viewKey, tSel.value);
 
 
 /* ---------- paletas de color (cada equipo guarda la suya) ---------- */
-const PALETAS = [['','Original','#EEF1F4','#1F4E8C'],['beige','Beige','#F2EBDD','#7A5A2E'],['blanco','Blanco','#FFFFFF','#3F5F8F'],['rosa','Rosado','#F8E8EC','#9E4A62'],
-                 ['menta','Menta','#E3F2EA','#2F7458'],['lavanda','Lavanda','#ECE7F6','#5E4E9C'],['celeste','Celeste','#E3EEF7','#2F6390']];
+const PALETAS = [['','Original','#EEF1F4','#1F4E8C'],['beige','Beige','#F7F1E6','#EAD9BA'],['arena','Arena','#F4EEE6','#E3D3BF'],['blanco','Blanco','#F7F8FA','#D9E3F1'],['perla','Gris perla','#F2F3F5','#DCDFE4'],['rosa','Rosado','#FBF0F2','#F2CFD9'],['durazno','Durazno','#FCF1EA','#F6D2BC'],['menta','Menta','#EEF7F2','#CBE8D7'],['salvia','Salvia','#F0F3EC','#D6E2CB'],['lavanda','Lavanda','#F3F1FA','#DCD5F2'],['celeste','Celeste','#EEF5FA','#CFE2F2']];
 const palGuardada = () => { try{ return localStorage.getItem('paleta'); }catch(e){ return null; } };
 function ponerPaleta(p, guardar){
+  if(p && !PALETAS.some(x=>x[0]===p)) p = 'beige';               // paletas viejas que ya no existen
   if(p) document.documentElement.dataset.pal = p; else delete document.documentElement.dataset.pal;
   if(guardar){ try{ localStorage.setItem('paleta', p); }catch(e){} }
-  const pop=$('palpop'); if(pop) pop.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.p===(p||'')));
+  $('palgrid')?.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.p===(p||'')));
   if(S.user) render();
 }
 (function(){
-  const pop=$('palpop');
-  pop.innerHTML = PALETAS.map(([k,n,bg,ac])=>`<button type="button" data-p="${k}" aria-pressed="false"><i style="background:linear-gradient(135deg,${bg} 0 55%,${ac} 55%)"></i>${n}</button>`).join('');
-  $('paldot').onclick = e => { e.stopPropagation(); pop.hidden = !pop.hidden; };
-  pop.onclick = e => { const b=e.target.closest('button'); if(b){ ponerPaleta(b.dataset.p, true); } };
-  document.addEventListener('click', e=>{ if(!pop.hidden && !e.target.closest('#palpop')) pop.hidden=true; });
-  document.addEventListener('keydown', e=>{ if(e.key==='Escape') pop.hidden=true; });
+  const modal=$('palmodal'), grid=$('palgrid');
+  grid.innerHTML = PALETAS.map(([k,n,bg,pri])=>`<button type="button" data-p="${k}" aria-pressed="false"><i style="background:linear-gradient(135deg,${bg} 0 50%,${pri} 50%)"></i>${n}</button>`).join('');
+  const abrir = () => { modal.hidden=false; const p=document.documentElement.dataset.pal||''; grid.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.p===p)); (grid.querySelector('[aria-pressed=true]')||grid.querySelector('button')).focus(); };
+  const cerrar = () => { modal.hidden=true; };
+  document.addEventListener('click', e=>{ if(e.target.closest('[data-pal-open]')){ e.preventDefault(); abrir(); } });
+  grid.onclick = e => { const b=e.target.closest('button'); if(b) ponerPaleta(b.dataset.p, true); };
+  $('palClose').onclick = cerrar;
+  modal.addEventListener('click', e=>{ if(e.target===modal) cerrar(); });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !modal.hidden) cerrar(); });
   const g = palGuardada(); if(g!=null) ponerPaleta(g, false);
 })();
 
