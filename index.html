@@ -584,6 +584,14 @@ html.rol-tv[data-tv="petroleo"]{--x-fondo:#0E2A2E;--x-card:#143A3F;--x-navy:#E8F
 tr.anul td{opacity:.5;text-decoration:line-through}
 tr.anul td:nth-child(2){text-decoration:none}
 @media (max-width:900px){.desp-g{grid-template-columns:1fr}}
+html.rol-contador [data-pleg="avance"],html.rol-contador [data-pleg="bit"],html.rol-contador #histCard,html.rol-contador #rentCard{display:none!important}
+html.rol-contador .kpis{grid-template-columns:minmax(0,420px)}
+.mat-ed{margin-left:auto;font-size:.78rem;padding:5px 12px;text-transform:none;letter-spacing:0}
+[data-pleg]>h2 .mat-ed+.plegar{margin-left:8px}
+.mat-edit td{vertical-align:middle}
+.mat-edit .mi{width:7.5em;padding:5px 8px;text-align:right}
+#despMov td.acc{white-space:nowrap}
+#despMov .note{display:block;font-size:.75rem;color:var(--muted)}
 .pers-grid{display:grid;grid-template-columns:1fr 6rem;gap:6px 8px;align-items:center;font-size:.85rem;margin-bottom:8px}
 </style>
 </head>
@@ -669,7 +677,7 @@ tr.anul td:nth-child(2){text-decoration:none}
       <section class="card" data-pleg="maq"><h2>Máquinas <span class="aside" id="machAside"></span></h2><div class="machines" id="machines"></div></section>
       <section class="card" data-pleg="rent" id="rentCard" hidden><h2>Costo de mano de obra <span class="aside" id="rentAside"></span></h2><div class="tbl-wrap" id="rent"></div></section>
       <section class="card" data-pleg="avance"><h2>Avance del turno <span class="aside" id="chAside"></span></h2><div class="chart-wrap" id="chart"></div><div class="legend" id="legend"></div></section>
-      <section class="card" data-pleg="mat"><h2>Materiales <span class="aside" id="matAside"></span></h2><div class="tbl-wrap" id="materials"></div></section>
+      <section class="card" data-pleg="mat"><h2>Materiales <span class="aside" id="matAside"></span><button class="btn mat-ed" id="matEdit" type="button" hidden>Editar materiales</button></h2><div class="tbl-wrap" id="materials"></div></section>
       <section class="card" data-pleg="bit"><h2>Bitácora del día</h2><ul class="log" id="log"></ul></section>
       <section class="card" id="histCard" data-pleg="hist"><h2>Historial de días <span class="aside" id="histAside"></span></h2><div class="chart-wrap" id="histChart"></div><div class="tbl-wrap" id="hist"></div></section>
     </div>
@@ -712,7 +720,9 @@ const MAT = [
   {k:'caja',      n:'Caja cartón Torito 1000 x 24 und',           g:'Envasado', q:1/24, u:'caja',c:121.31},
   {k:'cinta',     n:'Cinta transparente Bolten',                  g:'Envasado', q:4.33, u:'cm',  c:1.69},
 ];
-const COSTO_U = MAT.reduce((s,m)=>s+m.c,0);           // $2.215,62
+for(const m of MAT){ m.q0=m.q; m.c0=m.c; }              // valores de la fórmula original
+let COSTO_U = MAT.reduce((s,m)=>s+m.c,0);             // $2.215,62 con la fórmula original
+function aplicarFormula(f){ f=f||{}; for(const m of MAT){ const x=f[m.k]||{}; m.q = x.q!=null ? +x.q : m.q0; m.c = x.c!=null ? +x.c : m.c0; } COSTO_U = MAT.reduce((s,m)=>s+m.c,0); }
 const GRANDE_UND = 300*24;  // un salto de 300 cajas o más en un solo reporte pide confirmación
 const UXC = 24;
 // Turnos en minutos desde las 00:00 de la fecha del turno (el de noche cruza la medianoche
@@ -868,6 +878,43 @@ function renderRent(R){
   $('rent').innerHTML = h + `<p class="calc" style="margin:10px 0 0">${notas.join('<br>')}</p>`;
 }
 
+function abrirEdicionMat(){
+  S.matEdit = true; $('matEdit').hidden = true;
+  const ini = iniDe(S.dia) || {};
+  let rows='', grp='';
+  for(const m of MAT){
+    if(m.g!==grp){ grp=m.g; rows += `<tr class="grp"><td colspan="5">${esc(grp)}</td></tr>`; }
+    rows += `<tr><td>${esc(m.n)}</td>
+      <td><input class="mi" id="mq_${m.k}" type="number" step="any" min="0" value="${+m.q.toFixed(6)}"><span class="unit">${m.u}</span></td>
+      <td><input class="mi" id="mc_${m.k}" type="number" step="any" min="0" value="${+m.c.toFixed(2)}"><span class="unit">$</span></td>
+      <td><input class="mi" id="mi_${m.k}" type="number" step="any" min="0" value="${ini[m.k]!=null ? +toD(m,ini[m.k]).toFixed(3) : ''}" placeholder="—"><span class="unit">${dU(m.u)}</span></td>
+      <td><button class="btn" type="button" data-orig="${m.k}" title="Volver a la fórmula original">Original</button></td></tr>`;
+  }
+  $('materials').innerHTML = `<p class="calc" style="margin:0 0 10px">Editando materiales del <b>turno ${TN(S.viewT)} del ${esc(fmtFecha(S.viewKey))}</b>. La cantidad y el costo por envase cambian la fórmula para todos los turnos; el inventario es el de inicio de este turno.</p>
+    <table class="mat-edit"><thead><tr><th>Material</th><th>Cantidad por envase</th><th>Costo por envase</th><th>Inventario inicio turno</th><th></th></tr></thead><tbody>${rows}</tbody></table>
+    <div class="row2" style="margin-top:12px"><button class="btn primary" id="matSave" type="button">Guardar materiales</button><button class="btn" id="matCancel" type="button">Cancelar</button></div>`;
+  $('materials').onclick = e => { const b=e.target.closest('[data-orig]'); if(!b) return; const m=MAT.find(x=>x.k===b.dataset.orig); $('mq_'+m.k).value=+m.q0.toFixed(6); $('mc_'+m.k).value=+m.c0.toFixed(2); };
+  $('matCancel').onclick = () => { S.matEdit=false; $('materials').onclick=null; render(); };
+  $('matSave').onclick = async () => {
+    const formula = {}, inicio = {}; let hayIni=false;
+    for(const m of MAT){
+      const q=$('mq_'+m.k).value, c=$('mc_'+m.k).value, iv=$('mi_'+m.k).value;
+      const x={};
+      if(q!=='' && !isNaN(+q) && Math.abs(+q-m.q0)>1e-5) x.q=+q;
+      if(c!=='' && !isNaN(+c) && Math.abs(+c-m.c0)>0.004) x.c=+c;
+      if(Object.keys(x).length) formula[m.k]=x;
+      if(iv!=='' && !isNaN(+iv)){ inicio[m.k]=fromD(m,+iv); hayIni=true; }
+    }
+    $('matSave').disabled=true;
+    const ok1 = await escribir(S.db.doc('config/planta').update({formula}));   // reemplaza la fórmula completa
+    const ok2 = hayIni ? await setInicioTurno(inicio) : true;
+    $('matSave').disabled=false;
+    if(ok1 && ok2){ toast('Materiales guardados'); S.matEdit=false; $('materials').onclick=null; render(); }
+  };
+}
+// inventario de inicio del turno que se está viendo
+const setInicioTurno = inicio => mutateDia(()=>(S.viewT==='N' ? {inicioN:inicio, inicioNTs:Date.now()} : {inicio, inicioTs:Date.now()}), S.viewKey);
+
 /* ---------- inventario para despacho (contador; administrador y gerencia lo ven) ---------- */
 // despachos/{id} = {ts, tipo:'salida'|'entrada'|'inicial', und (envases), nota, por, anulado?}
 // Disponible = conteo inicial (si hay) + producción registrada después de ese conteo + entradas − salidas
@@ -915,6 +962,7 @@ function renderDesp(){
     const pinta = () => {
       f.querySelectorAll('.desp-tipo button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.t===S.dTipo));
       $('dNotaL').textContent = S.dTipo==='salida' ? 'Cliente o factura' : S.dTipo==='entrada' ? 'Motivo de la entrada' : 'Observación';
+      if(S.dEdit) return;
       $('dReg').textContent = S.dTipo==='salida' ? 'Registrar salida' : S.dTipo==='entrada' ? 'Registrar entrada' : 'Guardar conteo físico';
       dCalc();
     };
@@ -929,31 +977,57 @@ function renderDesp(){
   const nom = {salida:'Salida', entrada:'Entrada', inicial:'Conteo físico'};
   $('despMov').innerHTML = movs.length ? `<table class="hist"><thead><tr><th>Fecha</th><th>Movimiento</th><th>Cantidad</th><th>Detalle</th><th>Registró</th>${editaDesp()?'<th></th>':''}</tr></thead><tbody>${movs.map(m=>`<tr class="${m.anulado?'anul':''}">
       <td>${esc(fmtCorta(bog(m.ts).key))} ${hhmm(bog(m.ts).min)}</td><td>${nom[m.tipo]||m.tipo}${m.anulado?' <span class="pill">Anulado</span>':''}</td>
-      <td class="num">${m.tipo==='salida'?'−':m.tipo==='entrada'?'+':''}${cajTxt(m.und)}</td><td>${esc(m.nota||'')}</td><td>${esc(m.por||'')}</td>
-      ${editaDesp()?`<td>${m.anulado?'':`<button class="btn" data-anul="${esc(m.id)}" type="button">Anular</button>`}</td>`:''}</tr>`).join('')}</tbody></table>`
+      <td class="num">${m.tipo==='salida'?'−':m.tipo==='entrada'?'+':''}${cajTxt(m.und)}</td><td>${esc(m.nota||'')}${m.editadoPor?`<span class="note">Editado por ${esc(m.editadoPor)} · ${esc(fmtCorta(bog(m.editadoTs).key))} ${hhmm(bog(m.editadoTs).min)}</span>`:''}</td><td>${esc(m.por||'')}</td>
+      ${editaDesp()?`<td class="acc">${m.anulado?'':`<button class="btn" data-edit="${esc(m.id)}" type="button">Editar</button> <button class="btn" data-anul="${esc(m.id)}" type="button">Anular</button>`}</td>`:''}</tr>`).join('')}</tbody></table>`
     : '<p class="calc">Aún no hay movimientos.</p>';
   $('despMov').onclick = async e => {
+    const ed=e.target.closest('[data-edit]');
+    if(ed){ editarMov(ed.dataset.edit); return; }
     const b=e.target.closest('[data-anul]'); if(!b) return;
     if(b.dataset.ok!=='1'){ b.dataset.ok='1'; b.textContent='Confirmar anular'; b.classList.add('danger'); setTimeout(()=>{ if(b.isConnected){ b.dataset.ok=''; b.textContent='Anular'; b.classList.remove('danger'); } }, 5000); return; }
     if(await escribir(S.db.doc('despachos/'+b.dataset.anul).merge({anulado:true, anuladoPor:S.nombre||'', anuladoTs:Date.now()}))) toast('Movimiento anulado');
   };
 }
+function editarMov(id){
+  const m=(S.desp||[]).find(x=>x.id===id); if(!m) return;
+  S.dEdit = m; S.dTipo = m.tipo; S.dConf=null;
+  $('despForm').querySelectorAll('.desp-tipo button').forEach(b=>{ b.setAttribute('aria-pressed', b.dataset.t===m.tipo); b.disabled = b.dataset.t!==m.tipo; });
+  $('dCajas').value = Math.floor(m.und/UXC); $('dSueltos').value = m.und%UXC || ''; $('dNota').value = m.nota||'';
+  $('dReg').textContent = 'Guardar cambios';
+  let c=$('dCancel'); if(!c){ c=document.createElement('button'); c.id='dCancel'; c.type='button'; c.className='btn'; c.style.cssText='width:100%;margin-top:6px'; c.textContent='Cancelar edición'; $('dReg').after(c); c.onclick=finEdicion; }
+  c.hidden=false; dCalc(); $('despCard').scrollIntoView({behavior:'smooth', block:'start'}); $('dCajas').focus();
+}
+function finEdicion(){
+  S.dEdit=null; S.dConf=null; $('dCajas').value=''; $('dSueltos').value=''; $('dNota').value='';
+  $('despForm').querySelectorAll('.desp-tipo button').forEach(b=>b.disabled=false);
+  if($('dCancel')) $('dCancel').hidden=true;
+  $('despForm').querySelector('.desp-tipo button[aria-pressed=true]')?.click();
+}
 function dCalc(){
   const u = (+$('dCajas').value||0)*UXC + (+$('dSueltos').value||0);
   const D = calcDesp(); let t='';
+  if(S.dEdit && S.dEdit.tipo!=='inicial'){ const o=S.dEdit.und; D.disp += S.dEdit.tipo==='salida' ? o : -o; }
+  if(S.dEdit && S.dEdit.tipo==='inicial'){ t = u>=0 ? `El conteo físico queda en <b>${cajTxt(u)}</b>.` : ''; $('dCalc').innerHTML=t; $('dReg').disabled = $('dCajas').value===''; return; }
   if(u>0){
     if(S.dTipo==='salida') t = u > D.disp ? `<span class="delta-down">No hay suficiente: disponible ${cajTxt(Math.max(0,D.disp))}.</span>` : `Quedarían <b>${cajTxt(D.disp-u)}</b> disponibles.`;
     else if(S.dTipo==='entrada') t = `Quedarían <b>${cajTxt(D.disp+u)}</b> disponibles.`;
     else t = `El disponible pasa a ser <b>${cajTxt(u)}</b> desde ahora; la producción que se registre después se suma sola.`;
   }
   $('dCalc').innerHTML = t;
-  $('dReg').disabled = !(u>0 || (S.dTipo==='inicial' && $('dCajas').value!=='')) || (S.dTipo==='salida' && u>D.disp);
+  $('dReg').disabled = !(u>0 || (S.dTipo==='inicial' && $('dCajas').value!=='')) || (S.dTipo==='salida' && u>D.disp) || (S.dEdit && S.dTipo==='entrada' && D.disp+u<0);
 }
 async function regDesp(){
   const cajas=+$('dCajas').value||0, sueltos=+$('dSueltos').value||0, und=Math.round(cajas)*UXC+Math.round(sueltos);
   if(und<0 || (und===0 && S.dTipo!=='inicial')) return;
-  if(S.dTipo==='salida' && und>calcDesp().disp){ dCalc(); return; }
   const b=$('dReg');
+  if(S.dEdit){
+    if($('dReg').disabled) return;
+    if(S.dConf!=='edit'+und){ S.dConf='edit'+und; b.textContent=`Confirmar cambio: ${cajTxt(S.dEdit.und)} → ${cajTxt(und)}`; return; }
+    b.disabled=true;
+    if(await escribir(S.db.doc('despachos/'+S.dEdit.id).merge({und, nota:$('dNota').value.trim(), editadoPor:S.nombre||'', editadoTs:Date.now()}))) toast('Movimiento editado');
+    b.disabled=false; finEdicion(); return;
+  }
+  if(S.dTipo==='salida' && und>calcDesp().disp){ dCalc(); return; }
   if(S.dConf!==S.dTipo+und){ S.dConf=S.dTipo+und; b.textContent=`Confirmar: ${S.dTipo==='salida'?'salida de ':S.dTipo==='entrada'?'entrada de ':'conteo de '}${cajTxt(und)}`; return; }
   S.dConf=null; b.disabled=true;
   const id=uid(); const mov={ts:Date.now(), tipo:S.dTipo, und, nota:$('dNota').value.trim(), por:S.nombre||''};
@@ -1121,7 +1195,9 @@ function fmtFecha(k){ const [y,m,d]=k.split('-').map(Number); return new Date(Da
 function renderKpis(R){
   const cajas = Math.floor(R.total/UXC), sueltas = R.total%UXC;
   const meta = S.cfg.meta;
+  const soloProd = S.rol==='contador';
   let k = `<div class="kpi lead"><span class="lbl">Producido ${R.isToday?'en el turno':'en ese turno'} · ${TN(S.viewT)}</span><span class="val num">${cnt('total',R.total)}<small>und</small></span><span class="sub num">${nf0.format(cajas)} cajas${sueltas?` + ${sueltas} und`:''}</span></div>`;
+  if(soloProd){ $('kpis').innerHTML = k; runCounters($('kpis')); return; }
   if(R.isToday){
     let projTxt = R.proj!=null ? cnt('proj',R.proj) : '—';
     let sub = R.remaining===0 ? 'Turno terminado' : (R.proj!=null ? `Al ritmo actual, sin más paradas` : 'Se calcula con 15 min de producción reportada');
@@ -1217,7 +1293,10 @@ function renderChart(R){
   $('legend').innerHTML = `<span><i></i>Real acumulado</span>${R.isToday?'<span><i class="proj"></i>Proyección</span>':''}${R.hist.length?'<span><i class="ref"></i>Ritmo de días anteriores</span>':''}${meta?'<span><i class="meta"></i>Meta</span>':''}`;
 }
 
+const editaMat = () => S.rol==='contador' || S.rol==='admin';
 function renderMaterials(R){
+  const eb=$('matEdit'); if(eb) eb.hidden = !editaMat() || !!S.matEdit;
+  if(S.matEdit) return;                                    // mientras se edita no se redibuja
   const costo = R.total*COSTO_U;
   $('matAside').innerHTML = `Costo de materiales consumidos: <b class="num">${money(costo)}</b> (${'$'+nf2.format(COSTO_U)} por unidad)`;
   let rows = '', grp = '';
@@ -1808,7 +1887,8 @@ function subCostos(){
 function subCfg(){
   S.db.doc('config/planta').onSnapshot(snap=>{
     const c = snap.exists ? snap.data() : {};
-    S.cfg = {maquinas:Array.isArray(c.maquinas)&&c.maquinas.length?c.maquinas:[{id:'m1',nombre:'Máquina 1'}], meta:c.meta??null, historico:Array.isArray(c.historico)?c.historico:[]};
+    S.cfg = {maquinas:Array.isArray(c.maquinas)&&c.maquinas.length?c.maquinas:[{id:'m1',nombre:'Máquina 1'}], meta:c.meta??null, historico:Array.isArray(c.historico)?c.historico:[], formula:c.formula||{}};
+    aplicarFormula(S.cfg.formula);
     if($$('pMeta') && document.activeElement!==$$('pMeta')) $$('pMeta').value = S.cfg.meta ?? '';
     if($$('panel')) $$('panel').dataset.built='';
     if(S.user) render();
@@ -1831,6 +1911,7 @@ function makeDB(fs, db){
         get: async () => snapDoc(await fs.getDoc(ref)),
         set: d => fs.setDoc(ref, d),
         merge: d => fs.setDoc(ref, d, {merge:true}),
+        update: d => fs.updateDoc(ref, d),
         onSnapshot: (n, e) => fs.onSnapshot(ref, {includeMetadataChanges:true}, s => n({...snapDoc(s), pend:!!s.metadata?.hasPendingWrites, cache:!!s.metadata?.fromCache}), e)
       };
     },
@@ -1871,6 +1952,7 @@ async function enterApp(user){
   }
   S.db = makeDB(FBX.fsM, FBX.db); S.fb = S.db;
   S.user = user; S.rol = d.rol; S.nombre = d.nombre || user.email; S.canWrite = (d.rol==='admin' || d.rol==='jefe');
+  if(d.rol==='contador') document.documentElement.classList.add('rol-contador');
   if(d.rol==='tv'){ document.documentElement.classList.add('rol-tv'); delete document.documentElement.dataset.pal; let tt=null; try{ tt=localStorage.getItem('temaTV'); }catch(e){} ponerTemaTV(tt||'claro', false); const mc=$$('materials')?.closest('.card'); if(mc) mc.hidden=true; const hc=$$('histCard'); if(hc) hc.hidden=true; }
   if(S.rol==='admin'){
     const c = await FBX.fsM.getDoc(FBX.fsM.doc(FBX.db,'config','planta')).catch(()=>null);
@@ -1883,6 +1965,7 @@ async function enterApp(user){
   setTimeout(()=>{ $$('login').hidden=true; }, 450);
   $$('app').hidden = false;
   subCfg(); subDia(); subHist(); subCostos(); subDespachos();
+  if($$('matEdit')) $$('matEdit').onclick = abrirEdicionMat;
   startBoot(); render(); if(mode==='tv') wake();
 }
 
