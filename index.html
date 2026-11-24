@@ -479,7 +479,7 @@ html.rol-tv body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-
 @keyframes xLuz{to{transform:translate(6%,-4%)}}
 html.rol-tv .top,html.rol-tv .bgfx{display:none!important}
 html.rol-tv .app{position:relative;z-index:1;max-width:none;padding:min(1.6vw,2.8vh) min(2.5vw,4.4vh) min(1.2vw,2.1vh);height:100vh;display:flex;flex-direction:column}
-.tvb{font-family:'IBM Plex Sans',system-ui,sans-serif;font-variant-numeric:tabular-nums;color:var(--x-navy);flex:1;min-height:0;display:grid;grid-template-rows:auto minmax(0,1.15fr) minmax(0,1.25fr) auto auto;gap:min(1.15vw,2vh)}
+.tvb{font-family:'IBM Plex Sans',system-ui,sans-serif;font-variant-numeric:tabular-nums;color:var(--x-navy);flex:1;min-height:0;display:grid;grid-template-rows:auto minmax(0,1.2fr) minmax(0,1fr) auto auto;gap:min(1.15vw,2vh)}
 .xt-card{background:var(--x-card);border-radius:10px;box-shadow:var(--x-sombra);padding:min(1.4vw,2.4vh) min(1.7vw,3vh);min-height:0;position:relative;overflow:hidden}
 .xt-l{display:block;font-size:min(1.05vw,1.85vh);color:var(--x-gris)}
 .xt-s{font-size:min(1vw,1.75vh);color:var(--x-gris)}
@@ -515,11 +515,11 @@ html.rol-tv .app{position:relative;z-index:1;max-width:none;padding:min(1.6vw,2.
 .xt-okt{color:var(--x-ok);font-weight:600}
 /* máquinas */
 .xt-maqs{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:min(1.15vw,2vh);min-height:0}
-.xm{display:flex;flex-direction:column}
+.xm{display:flex;flex-direction:column;justify-content:center}
 .xm-h{display:flex;align-items:center;gap:.55em;font-size:min(1.35vw,2.4vh);font-weight:600}
 .xm-h i{width:.5em;height:.5em;border-radius:50%;background:var(--x-ok);flex:none}
 .xm-st{margin-left:auto;font-size:.78em;font-weight:500;color:var(--x-ok);background:var(--x-okbg);padding:.25em .7em;border-radius:4px}
-.xm-n{font-size:min(4.4vw,7.6vh);font-weight:600;line-height:1.1;margin-top:.12em}
+.xm-n{font-size:min(5vw,8.4vh);font-weight:600;line-height:1.1;margin-top:.12em}
 .xm-n small{font-size:.32em;font-weight:400;color:var(--x-gris);margin-left:.3em}
 .xm-d{font-size:min(1.05vw,1.85vh);color:var(--x-gris)}
 .xm-d b{color:var(--x-navy);font-weight:600}
@@ -563,6 +563,9 @@ html.rol-tv[data-tv="arena"]{--x-fondo:#F2EEE7;--x-card:#FFFDF9;--x-navy:#1F2A3D
 html.rol-tv[data-tv="marino"]{--x-fondo:#0F1E38;--x-card:#152847;--x-navy:#EAF0F8;--x-gris:#9AABC4;--x-linea:#25406A;--x-oro:#D2B07A;--x-oro-l:#E6CB9A;--x-track:#223B62;--x-ok:#4CC38A;--x-okbg:rgb(76 195 138 / .16);--x-alto:#F06A5D;--x-altobg:rgb(240 106 93 / .16);--x-idlebg:rgb(255 255 255 / .06);--x-g1:rgb(111 183 232 / .12);--x-g2:rgb(210 176 122 / .10);--x-sombra:0 1px 0 rgb(255 255 255 / .04) inset,0 18px 36px -20px rgb(0 0 0 / .65);--x-torito:drop-shadow(0 0 1px #fff) drop-shadow(0 0 1px #fff);color-scheme:dark}
 html.rol-tv[data-tv="grafito"]{--x-fondo:#191C21;--x-card:#23272E;--x-navy:#ECEEF1;--x-gris:#A2A9B4;--x-linea:#353B45;--x-oro:#C9A86F;--x-oro-l:#E2C893;--x-track:#323843;--x-ok:#52C287;--x-okbg:rgb(82 194 135 / .15);--x-alto:#EF6B5E;--x-altobg:rgb(239 107 94 / .16);--x-idlebg:rgb(255 255 255 / .06);--x-g1:rgb(150 160 175 / .08);--x-g2:rgb(201 168 111 / .08);--x-sombra:0 1px 0 rgb(255 255 255 / .04) inset,0 18px 36px -20px rgb(0 0 0 / .65);--x-torito:drop-shadow(0 0 1px #fff) drop-shadow(0 0 1px #fff);color-scheme:dark}
 html.rol-tv[data-tv="petroleo"]{--x-fondo:#0E2A2E;--x-card:#143A3F;--x-navy:#E8F2F1;--x-gris:#9DB9B7;--x-linea:#24524F;--x-oro:#D4B27A;--x-oro-l:#E8CD9C;--x-track:#1F4A4C;--x-ok:#5BD49A;--x-okbg:rgb(91 212 154 / .15);--x-alto:#F07A6A;--x-altobg:rgb(240 122 106 / .16);--x-idlebg:rgb(255 255 255 / .06);--x-g1:rgb(91 212 154 / .08);--x-g2:rgb(212 178 122 / .09);--x-sombra:0 1px 0 rgb(255 255 255 / .04) inset,0 18px 36px -20px rgb(0 0 0 / .65);--x-torito:drop-shadow(0 0 1px #fff) drop-shadow(0 0 1px #fff);color-scheme:dark}
+.hist.rent{font-size:.82rem}.hist.rent th{white-space:nowrap}.hist.rent td:first-child{min-width:9.5em}
+.hist.rent td.num{text-align:right;white-space:nowrap}
+.hist.rent tr.tot td{border-top:2px solid var(--line);background:var(--surface-2)}
 .pers-grid{display:grid;grid-template-columns:1fr 6rem;gap:6px 8px;align-items:center;font-size:.85rem;margin-bottom:8px}
 </style>
 </head>
@@ -636,6 +639,7 @@ html.rol-tv[data-tv="petroleo"]{--x-fondo:#0E2A2E;--x-card:#143A3F;--x-navy:#E8F
     <aside class="card panel only-tablet" id="panel"></aside>
     <div class="stack">
       <section class="card" data-pleg="maq"><h2>Máquinas <span class="aside" id="machAside"></span></h2><div class="machines" id="machines"></div></section>
+      <section class="card" data-pleg="rent" id="rentCard" hidden><h2>Rentabilidad por máquina <span class="aside" id="rentAside"></span></h2><div class="tbl-wrap" id="rent"></div></section>
       <section class="card" data-pleg="avance"><h2>Avance del turno <span class="aside" id="chAside"></span></h2><div class="chart-wrap" id="chart"></div><div class="legend" id="legend"></div></section>
       <section class="card" data-pleg="mat"><h2>Materiales <span class="aside" id="matAside"></span></h2><div class="tbl-wrap" id="materials"></div></section>
       <section class="card" data-pleg="bit"><h2>Bitácora del día</h2><ul class="log" id="log"></ul></section>
@@ -802,6 +806,47 @@ function compute(){
   return {isToday, now, nowMin, ev, persTot, M:Object.values(M), total, elapsed, remaining, proj:projOk?proj:null, rateTot, refAvg, refNow, hist, mats, limit, inicio};
 }
 
+/* ---------- rentabilidad (solo administrador y gerencia) ---------- */
+// costos/planta = {precio, salarios:{m1: salario mensual por operario}, prest: % carga prestacional, materiales: true/false}
+const verRent = () => S.rol==='admin' || S.rol==='gerencia';
+const money0 = v => v==null ? '—' : (v<0?'−':'') + '$' + nf0.format(Math.abs(Math.round(v)));
+const costoDiaOp = id => { const c=S.costos||{}; const sal=c.salarios?.[id]; return sal ? sal/30*(1+(+c.prest||0)/100) : null; };
+function rentMaq(und, pers, id){
+  const c = S.costos||{}; const precio = +c.precio||null;
+  const ventas = precio ? und*precio : null;
+  const mat = c.materiales===false ? 0 : und*COSTO_U;
+  const dia = costoDiaOp(id);
+  const mo = (pers!=null && dia!=null) ? pers*dia : null;
+  const gan = (ventas!=null && mo!=null) ? ventas - mat - mo : null;
+  return {ventas, mat, dia, mo, gan, porU: gan!=null && und>0 ? gan/und : null, margen: gan!=null && ventas>0 ? gan/ventas*100 : null};
+}
+function renderRent(R){
+  const card = $('rentCard'); if(!card) return;
+  card.hidden = !verRent(); if(card.hidden) return;
+  const c = S.costos||{};
+  const faltan = [];
+  if(!c.precio) faltan.push('el precio de venta por envase');
+  const sinSal = R.M.filter(m=>!c.salarios?.[m.id]).map(m=>m.nombre);
+  if(sinSal.length) faltan.push('el salario de ' + sinSal.join(' y '));
+  const sinPers = R.M.filter(m=>m.pers==null).map(m=>m.nombre);
+  $('rentAside').textContent = `Turno ${TN(S.viewT)} · ${c.materiales===false?'sin descontar materiales':'descontando materiales'}`;
+  const filas = R.M.map(m=>({m, r:rentMaq(m.und, m.pers, m.id)}));
+  const tot = filas.reduce((a,{m,r})=>({und:a.und+m.und, ventas:a.ventas+(r.ventas||0), mat:a.mat+r.mat, mo:a.mo+(r.mo||0), pers:a.pers+(m.pers||0), ok:a.ok && r.gan!=null}), {und:0,ventas:0,mat:0,mo:0,pers:0,ok:true});
+  const totGan = tot.ok ? tot.ventas - tot.mat - tot.mo : null;
+  const td = v => `<td class="num">${v}</td>`;
+  const ganTd = g => `<td class="num"><b class="${g==null?'':g>=0?'delta-up':'delta-down'}">${money0(g)}</b></td>`;
+  let h = `<table class="hist rent"><thead><tr><th>Máquina</th><th>Envases</th><th>Ventas</th>${c.materiales===false?'':'<th>Materiales</th>'}<th>Operarios</th><th>Costo día c/u</th><th>Mano de obra</th><th>Ganancia</th><th>Por envase</th><th>Margen</th></tr></thead><tbody>`;
+  for(const {m,r} of filas){
+    h += `<tr><td><b>${esc(m.nombre)}</b></td>${td(nf0.format(m.und))}${td(money0(r.ventas))}${c.materiales===false?'':td(money0(r.mat))}${td(m.pers!=null?nf0.format(m.pers):'—')}${td(money0(r.dia))}${td(money0(r.mo))}${ganTd(r.gan)}${td(r.porU!=null?money0(r.porU):'—')}${td(r.margen!=null?nf1.format(r.margen)+' %':'—')}</tr>`;
+  }
+  h += `<tr class="tot"><td><b>Total del turno</b></td>${td('<b>'+nf0.format(tot.und)+'</b>')}${td(c.precio?money0(tot.ventas):'—')}${c.materiales===false?'':td(money0(tot.mat))}${td(nf0.format(tot.pers))}${td('')}${td(money0(tot.mo))}${ganTd(totGan)}${td(totGan!=null&&tot.und>0?money0(totGan/tot.und):'—')}${td(totGan!=null&&tot.ventas>0?nf1.format(totGan/tot.ventas*100)+' %':'—')}</tr></tbody></table>`;
+  const notas = [];
+  if(faltan.length) notas.push(`Para calcular la ganancia falta ${faltan.join(' y ')}${S.rol==='admin'?': agrégalo en <b>Registro → Costos y rentabilidad</b>.':' (lo registra el administrador).'}`);
+  if(sinPers.length) notas.push(`Sin operarios registrados en este turno: ${sinPers.map(esc).join(', ')}.`);
+  notas.push(`Costo día por operario = salario mensual ÷ 30${+c.prest?` + ${nf1.format(+c.prest)} % de carga prestacional`:''}. Cada operario cuenta un día de trabajo por turno.${c.materiales===false?'':` Materiales a ${money(COSTO_U)} por envase (fórmula Torito 1000).`}`);
+  $('rent').innerHTML = h + `<p class="calc" style="margin:10px 0 0">${notas.join('<br>')}</p>`;
+}
+
 /* ---------- render ---------- */
 const $ = id => document.getElementById(id);
 const prevVal = {};
@@ -846,7 +891,7 @@ function render(){
   const esTV = S.rol==='tv';
   $('kpis').hidden = esTV; $('layout').hidden = esTV; $('tvBoard').hidden = !esTV;
   if(esTV){ renderTV(R); return; }
-  renderKpis(R); renderMachines(R); renderChart(R); renderMaterials(R); renderLog(R); renderHist();
+  renderKpis(R); renderMachines(R); renderRent(R); renderChart(R); renderMaterials(R); renderLog(R); renderHist();
   requestAnimationFrame(segInd);
   if(!$('panel').hidden) renderPanel(R);
 }
@@ -884,21 +929,6 @@ function renderTV(R){
       <circle cx="64" cy="64" r="54" class="xr-fg${pct>=100?' done':''}" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(S.tvOff ?? C).toFixed(1)}" data-off="${off.toFixed(1)}"/>
       <text x="64" y="71" class="xr-pct">${nf0.format(Math.floor(pctReal))}%</text></svg>` : '';
 
-  // curva suave del turno por máquina
-  const spark = m => {
-    const W=600, H=90, x=t=>(Math.min(Math.max(t,T_INI),T_FIN)-T_INI)/(T_FIN-T_INI)*W;
-    const evs = R.ev.filter(e=>e.maq===m.id && e.tipo==='prod');
-    const top = Math.max(1, ...R.M.map(q=>q.und));
-    const y = v => H-4 - v/top*(H-12);
-    const endT = R.isToday ? Math.min(R.nowMin,T_FIN) : T_FIN;
-    let acc=0; const p=[[x(T_INI),y(0)]];
-    for(const e of evs){ acc+=e.unidades; const px=x(tm(e.ts)); if(px>p[p.length-1][0]+0.5) p.push([px,y(acc)]); else p[p.length-1][1]=y(acc); }
-    if(x(endT)>p[p.length-1][0]+0.5) p.push([x(endT),y(acc)]);
-    const d = curvaSuave(p), lx=p[p.length-1][0], ly=p[p.length-1][1];
-    return `<svg class="xm-sp" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
-      <defs><linearGradient id="sp_${esc(m.id)}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="s0"/><stop offset="1" class="s1"/></linearGradient></defs>
-      <path d="${d} L${lx.toFixed(1)},${H} L0,${H} Z" fill="url(#sp_${esc(m.id)})"/><path d="${d}" class="sp-l"/></svg>`;
-  };
   const maqs = R.M.map(m=>{
     const ult = R.ev.filter(e=>e.maq===m.id && e.tipo==='prod').pop();
     const st = m.down ? 'bad' : (m.und>0 ? 'ok' : 'idle');
@@ -911,7 +941,6 @@ function renderTV(R){
       <div class="xm-n">${cnt('tvm_'+m.id, m.und)}<small>envases</small></div>
       <div class="xm-d"><b>${nf0.format(Math.floor(m.und/UXC))}</b> cajas · ${det}</div>
       <div class="xm-u">${ult ? `Último reporte ${hhmm(bog(ult.ts).min)}${ult.por?` · ${esc(ult.por)}`:''}` : 'Sin reportes en el turno'}</div>
-      ${spark(m)}
     </article>`;
   }).join('');
   const rh = R.rateTot*60, refH = R.refAvg!=null ? R.refAvg/REF_MIN*60 : null;
@@ -1213,10 +1242,17 @@ function resumenTurno(d,t){
   }
   for(const k in abiertas) down += prodMinT(abiertas[k], fin, t);
   const efectivo = Math.max(0, (esHoy ? prodMinT(0,fin,t) : jor(t)) - down);
-  const pers = Object.values(persDe(d,t)).reduce((s,v)=>s+(+v||0),0);
-  return {fecha:d.fecha, t, k:d.fecha+t, esHoy, und, cajas:Math.floor(und/UXC), fallas, down, primero, ultimo, pers, ritmo: efectivo>0 && und>0 ? und/efectivo*60 : null, costo: und*COSTO_U, inicio: !!iniDe(d,t)};
+  const pmap = persDe(d,t); const pers = Object.values(pmap).reduce((s,v)=>s+(+v||0),0);
+  const porMaq = {}; for(const e of ev) if(e.tipo==='prod') porMaq[e.maq]=(porMaq[e.maq]||0)+e.unidades;
+  return {fecha:d.fecha, t, k:d.fecha+t, esHoy, und, porMaq, pmap, cajas:Math.floor(und/UXC), fallas, down, primero, ultimo, pers, ritmo: efectivo>0 && und>0 ? und/efectivo*60 : null, costo: und*COSTO_U, inicio: !!iniDe(d,t)};
 }
 // todos los turnos con movimiento, del más reciente al más antiguo
+function ganHist(d){
+  let g=0;
+  const ids = new Set([...Object.keys(d.porMaq||{}), ...S.cfg.maquinas.map(m=>m.id)]);
+  for(const id of ids){ const und=d.porMaq?.[id]||0; if(!und) continue; const r=rentMaq(und, d.pmap?.[id]??null, id); if(r.gan==null) return '—'; g+=r.gan; }
+  return `<span class="${g>=0?'delta-up':'delta-down'}">${money0(g)}</span>`;
+}
 function histTurnos(){
   const out=[];
   for(const d of (S.hist||[])) for(const t of ['D','N']){ const r=resumenTurno(d,t); if(r.und>0 || evDe(d,t).length || r.esHoy) out.push(r); }
@@ -1268,10 +1304,10 @@ function renderHist(){
       <td>${d.fallas||'0'}</td>
       <td>${d.down?nf0.format(d.down)+' min':'0'}</td>
       <td>${dif!=null?`<span class="${dif>=0?'delta-up':'delta-down'}">${dif>=0?'+':''}${nf0.format(dif)}</span>`:'—'}</td>
-      <td>${money(d.costo)}</td>
+      <td>${money(d.costo)}</td>${verRent()?`<td>${ganHist(d)}</td>`:''}
     </tr>`;
   }).join('');
-  $('hist').innerHTML = `<table class="hist"><thead><tr><th>Turno</th><th>Unidades</th><th>Cajas</th><th>% meta</th><th>Ritmo und/h</th><th>1er – últ. reporte</th><th>Operarios</th><th>Fallas</th><th>Detenida</th><th>Vs. ${meta?'meta':'promedio'}</th><th>Costo materiales</th></tr></thead><tbody>${rows}</tbody></table><p class="calc" style="margin:10px 0 0">Toca un turno para verlo completo arriba (máquinas, gráfica, materiales y bitácora).</p>`;
+  $('hist').innerHTML = `<table class="hist"><thead><tr><th>Turno</th><th>Unidades</th><th>Cajas</th><th>% meta</th><th>Ritmo und/h</th><th>1er – últ. reporte</th><th>Operarios</th><th>Fallas</th><th>Detenida</th><th>Vs. ${meta?'meta':'promedio'}</th><th>Costo materiales</th>${verRent()?'<th>Ganancia</th>':''}</tr></thead><tbody>${rows}</tbody></table><p class="calc" style="margin:10px 0 0">Toca un turno para verlo completo arriba (máquinas, gráfica, materiales y bitácora).</p>`;
 }
 function abrirDia(k){
   if(!k || !S.db) return;
@@ -1352,6 +1388,18 @@ function renderPanel(R){
         <button class="btn primary" id="pInvSave" type="button" style="margin-top:10px;width:100%">Guardar inventario</button>
       </details>
     </div>
+    <div class="block" ${S.rol==='admin'?'':'hidden'}>
+      <details id="pCostD"><summary>Costos y rentabilidad</summary>
+        <p class="calc">Solo los ve el administrador y gerencia. Se aplican a todos los turnos.</p>
+        <div class="pers-grid" style="margin-top:8px">
+          <label for="cPrecio">Precio de venta por envase ($)</label><input id="cPrecio" type="number" inputmode="decimal" min="0" step="any" placeholder="$">
+          ${maqs.map(m=>`<label for="cSal_${esc(m.id)}">Salario mensual por operario · ${esc(m.nombre)} ($)</label><input id="cSal_${esc(m.id)}" type="number" inputmode="numeric" min="0" step="1000" placeholder="$">`).join('')}
+          <label for="cPrest">Carga prestacional (%)</label><input id="cPrest" type="number" inputmode="decimal" min="0" max="200" step="any" placeholder="0">
+        </div>
+        <label style="display:flex;gap:8px;align-items:center;font-size:.85rem;margin:6px 0 10px"><input id="cMat" type="checkbox" checked> Descontar el costo de materiales (fórmula Torito 1000)</label>
+        <button class="btn primary" id="pCostSave" type="button" style="width:100%">Guardar costos</button>
+      </details>
+    </div>
     <div class="block" ${S.rol==='admin' && !pasado?'':'hidden'}>
       <details><summary>Meta por turno</summary>
         <div class="row2" style="margin-top:10px"><input id="pMeta" type="number" inputmode="numeric" min="0" step="100" aria-label="Meta por turno en unidades" placeholder="Unidades"><button class="btn" id="pMetaSave" type="button">Guardar meta</button></div>
@@ -1365,7 +1413,7 @@ function renderPanel(R){
     wirePanel();
     fillInv();
     $('pMeta').value = S.cfg.meta ?? '';
-    fillPers();
+    fillPers(); fillCostos();
   }
   if(!S.draft.dirty){ S.draft.cajas = 0; S.draft.sueltas = 0; }
   if(document.activeElement!==$('pCajas')) $('pCajas').value = S.draft.cajas;
@@ -1375,6 +1423,12 @@ function renderPanel(R){
   $('pEstados').innerHTML = R.M.map(m=>`<div class="mach-ctrl"><div class="t"><span>${esc(m.nombre)}</span>${m.down?'<span class="pill bad">Detenida</span>':'<span class="pill ok">Operando</span>'}</div>
     ${m.down ? `<button class="btn good" data-reanuda="${esc(m.id)}" type="button">Máquina reanudó</button>`
              : `<input type="text" id="nota_${esc(m.id)}" placeholder="Qué pasó (ej. atasco en válvulas)" value="${esc(S.notaFalla[m.id]||'')}"><button class="btn danger" data-falla="${esc(m.id)}" type="button">Reportar falla</button>`}</div>`).join('');
+}
+function fillCostos(){
+  const c=S.costos||{}, set=(id,v)=>{ const el=$$(id); if(el && document.activeElement!==el) el.value = v ?? ''; };
+  set('cPrecio', c.precio); set('cPrest', c.prest);
+  for(const m of S.cfg.maquinas) set('cSal_'+m.id, c.salarios?.[m.id]);
+  if($$('cMat')) $$('cMat').checked = c.materiales!==false;
 }
 function fillPers(){ const p=persDe(S.dia); for(const m of S.cfg.maquinas){ const el=$('pers_'+m.id); if(el && document.activeElement!==el) el.value = p[m.id]!=null ? p[m.id] : ''; } }
 function fillInv(){ const ini = iniDe(S.dia) || {}; for(const m of MAT){ const el=$('inv_'+m.k); if(el && document.activeElement!==el) el.value = ini[m.k]!=null ? +toD(m,ini[m.k]).toFixed(3) : ''; } }
@@ -1467,6 +1521,12 @@ function wirePanel(){
     for(const m of MAT){ const v=$('inv_'+m.k).value; if(v!=='' && !isNaN(+v)) inicio[m.k] = fromD(m, +v); }
     if(!Object.keys(inicio).length){ toast('Escribe al menos una cantidad', true); return; }
     if(await setInicio(inicio)){ toast('Inventario de inicio guardado'); $('pInvD').open=false; }
+  };
+  $('pCostSave').onclick = async () => {
+    const num = id => { const v=$(id)?.value.trim(); return v==='' || v==null || isNaN(+v) ? null : Math.max(0, +v); };
+    const salarios = {}; for(const m of S.cfg.maquinas){ const v=num('cSal_'+m.id); if(v!=null) salarios[m.id]=Math.round(v); }
+    const datos = {precio:num('cPrecio'), prest:num('cPrest'), materiales:$('cMat').checked, salarios};
+    if(await escribir(S.db.doc('costos/planta').set(datos))) { toast('Costos guardados'); $('pCostD').open=false; }
   };
   $('pMetaSave').onclick = async () => {
     const v = $('pMeta').value.trim(); const meta = v==='' ? null : Math.max(0, Math.round(+v));
@@ -1611,6 +1671,14 @@ function subHist(){
     if(S.rol==='tv') render(); else renderHist();
   }, ()=>{});
 }
+function subCostos(){
+  if(!verRent()) return;
+  S.db.doc('costos/planta').onSnapshot(snap=>{
+    S.costos = snap.exists ? snap.data() : {};
+    fillCostos();
+    if(S.user) render();
+  }, ()=>{});
+}
 function subCfg(){
   S.db.doc('config/planta').onSnapshot(snap=>{
     const c = snap.exists ? snap.data() : {};
@@ -1687,7 +1755,7 @@ async function enterApp(user){
   $$('login').classList.add('out');
   setTimeout(()=>{ $$('login').hidden=true; }, 450);
   $$('app').hidden = false;
-  subCfg(); subDia(); subHist();
+  subCfg(); subDia(); subHist(); subCostos();
   startBoot(); render(); if(mode==='tv') wake();
 }
 
