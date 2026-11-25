@@ -333,7 +333,7 @@ html.tv .kpi.lead{background:var(--accent-soft);color:var(--ink);border-color:va
 #histChart rect{transition:opacity .2s}#histChart rect:hover{opacity:.8}
 .bgfx{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
 .app{position:relative;z-index:1}
-.kpi,.card{background:var(--surface);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.kpi,.card{background:var(--surface)}
 .kpi.lead{backdrop-filter:none}
 
 /* tarjetas: luz que sigue el cursor */
@@ -406,7 +406,7 @@ tbody tr:hover td:first-child{padding-left:14px}
 .login{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:24px 16px;transition:opacity .45s,transform .45s}
 .login.out{opacity:0;transform:scale(1.03);pointer-events:none}
 .lcard{width:min(380px,100%);display:flex;flex-direction:column;gap:14px;padding:28px 24px;border-radius:10px;border:1px solid var(--line);
-  background:color-mix(in srgb,var(--surface) 90%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 30px 60px -30px rgb(10 20 35 / .5);animation:rise .7s cubic-bezier(.2,.7,.2,1) both}
+  background:var(--surface);box-shadow:0 30px 60px -30px rgb(10 20 35 / .5);animation:rise .7s cubic-bezier(.2,.7,.2,1) both}
 .lbrand{display:flex;align-items:center;justify-content:center;gap:14px}
 .lbrand .mark{height:4.2rem}
 .lsub{margin:-4px 0 6px;text-align:center;font-family:var(--display);font-weight:600;font-size:1.1rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
@@ -704,7 +704,7 @@ const firebaseConfig = {
 
 
 
-/* ---------- Fórmula por unidad: Espuma Torito 1000 (Excel suministrado) ---------- */
+/* ---------- Fórmula por unidad (Excel suministrado; editable desde Materiales) ---------- */
 const MAT = [
   {k:'genapol',   n:'Genapol LRO 28% (Lauril-Caflon-Kapol Less)', g:'Núcleo', q:10.81,  u:'g',   c:45.13},
   {k:'fragancia', n:'Fragancia Plumeria Ref. 2022885',            g:'Núcleo', q:1.01,   u:'g',   c:55.65},
@@ -722,6 +722,9 @@ const MAT = [
 ];
 for(const m of MAT){ m.q0=m.q; m.c0=m.c; }              // valores de la fórmula original
 let COSTO_U = MAT.reduce((s,m)=>s+m.c,0);             // $2.215,62 con la fórmula original
+// Nombres oficiales de las máquinas (se imponen sobre lo guardado en la base de datos)
+const NOMBRE_MAQ = {m1:'Máquina automática', m2:'Máquina manual'};
+const nombrarMaq = l => (l||[]).map(m=>({...m, nombre: NOMBRE_MAQ[m.id] || m.nombre}));
 function aplicarFormula(f){ f=f||{}; for(const m of MAT){ const x=f[m.k]||{}; m.q = x.q!=null ? +x.q : m.q0; m.c = x.c!=null ? +x.c : m.c0; } COSTO_U = MAT.reduce((s,m)=>s+m.c,0); }
 const GRANDE_UND = 300*24;  // un salto de 300 cajas o más en un solo reporte pide confirmación
 const UXC = 24;
@@ -805,7 +808,7 @@ function compute(){
   const nowMin = isToday ? tm(Date.now()) : 2880;
   const ev = normEvents(evDe(S.dia, S.viewT));
   const pers = persDe(S.dia);
-  const maqs = S.cfg.maquinas.length ? S.cfg.maquinas : [{id:'m1',nombre:'Máquina 1'}];
+  const maqs = S.cfg.maquinas.length ? S.cfg.maquinas : nombrarMaq([{id:'m1'}]);
   const M = {};
   for(const m of maqs) M[m.id] = {id:m.id, nombre:m.nombre, pers:(pers[m.id]??null), und:0, lastTs:null, down:false, downSince:null, downMin:0, nota:'', fallas:0};
   const pts = [];
@@ -1068,7 +1071,12 @@ function runCounters(root){
   });
 }
 
-function render(){
+let renderPend = false;
+function render(){                       // agrupa varios avisos seguidos en un solo dibujo
+  if(renderPend) return; renderPend = true;
+  requestAnimationFrame(()=>{ renderPend = false; renderAhora(); });
+}
+function renderAhora(){
   const R = compute();
   document.documentElement.classList.toggle('tv', mode==='tv');
   $('mTablet').setAttribute('aria-pressed', mode==='tablet');
@@ -1181,7 +1189,7 @@ function renderTV(R){
       <div class="xt-card xt-k"><span class="xt-l">Turno anterior</span><div class="xt-v">${prev?nf0.format(prev.und):'—'}</div><span class="xt-s">${prev?`Turno ${TN(prev.t)} · ${esc(fmtCorta(prev.fecha))} · ${nf0.format(prev.cajas)} cajas`:'Sin registros'}</span></div>
     </section>
     <footer class="xt-pie">
-      <div class="xt-prodl"><img src="${TORITO_SRC}" alt="Espuma Torito">Espuma Torito 1000 <small>Diversiones · 800 ml</small></div>
+      <div class="xt-prodl"><img src="${TORITO_SRC}" alt="Espuma Torito">Espuma Torito</div>
       <div class="xt-ult"><i class="xt-live"></i><span>${lastTxt}</span></div>
       <button class="xt-col" type="button" data-pal-open>Colores</button><button class="xt-salir" type="button" onclick="document.getElementById('salir').click()">Salir</button>
     </footer>`;
@@ -1329,7 +1337,6 @@ document.addEventListener('pointermove', e=>{
   const c = e.target.closest?.('.kpi,.card,.mach'); if(!c) return;
   const r = c.getBoundingClientRect(), px=(e.clientX-r.left), py=(e.clientY-r.top);
   c.style.setProperty('--mx', px+'px'); c.style.setProperty('--my', py+'px');
-  if(c.classList.contains('kpi') && !RM){ c.style.setProperty('--ry', ((px/r.width)-.5)*8+'deg'); c.style.setProperty('--rx', (.5-(py/r.height))*8+'deg'); }
 }, {passive:true});
 document.addEventListener('pointerleave', e=>{ const c=e.target; if(c.classList?.contains('kpi')){ c.style.setProperty('--rx','0deg'); c.style.setProperty('--ry','0deg'); } }, true);
 // onda al tocar botones
@@ -1394,6 +1401,7 @@ document.addEventListener('pointermove', e=>{
   tip.style.left=(b.left-w.left+b.width/2+$('histChart').scrollLeft)+'px'; tip.style.top=(b.top-w.top)+'px'; tip.classList.add('on');
 }, {passive:true});
 
+const TACTIL = matchMedia('(pointer: coarse)').matches;   // celular o tablet
 // fondo dinámico: malla de puntos en onda que se aparta del cursor + luces suaves
 (function(){
   const cv=$('bgfx'); if(!cv || RM) return;
@@ -1408,7 +1416,7 @@ document.addEventListener('pointermove', e=>{
     requestAnimationFrame(frame);
     if(document.hidden) return;
     if(S.rol==='tv') return;                                      // el TV no usa este fondo
-    const fps = mode==='tablet' ? 20 : 30;     // menos consumo en TV y tablet
+    const fps = TACTIL ? 10 : mode==='tablet' ? 15 : 24;     // celulares y tablets: más liviano
     if(now-lastF < 1000/fps) return; lastF=now;
     if(now-last > 2000 || !cA){ const cs=getComputedStyle(document.documentElement); cA=cs.getPropertyValue('--accent').trim(); cM=cs.getPropertyValue('--muted').trim(); last=now; }
     const dt=Math.min(.1,(now-prev)/1000); prev=now;
@@ -1422,16 +1430,19 @@ document.addEventListener('pointermove', e=>{
       const g = ctx.createRadialGradient(x,y,0,x,y,r); g.addColorStop(0, cA); g.addColorStop(1,'transparent');
       ctx.globalAlpha = .08; ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
     }
-    const gap=34;
+    const gap = TACTIL ? 40 : 34;
+    const lejos = new Path2D(), cerca = new Path2D();      // todos los puntos en dos trazos
     for(let y=gap/2;y<H;y+=gap){
       for(let x=gap/2;x<W;x+=gap){
         const wv = Math.sin(x*.012 + t*.9) * Math.cos(y*.014 - t*.7);
-        const d = Math.hypot(x-sx,y-sy), k = Math.max(0, 1-d/reach);
+        const d = Math.hypot(x-sx,y-sy), k = d<reach ? 1-d/reach : 0;
         const dx = k ? (x-sx)/(d||1)*k*push : 0, dy = k ? (y-sy)/(d||1)*k*push : 0;
-        ctx.beginPath(); ctx.arc(x+dx, y+dy+wv*amp, 1.1 + k*2.4 + (wv+1)*.35, 0, 6.283);
-        ctx.fillStyle = k>0 ? cA : cM; ctx.globalAlpha = .13 + k*.6 + (wv+1)*.05; ctx.fill();
+        const r = 1.1 + k*2.4 + (wv+1)*.35, px = x+dx, py = y+dy+wv*amp;
+        const p = k>0 ? cerca : lejos; p.moveTo(px+r, py); p.arc(px, py, r, 0, 6.283);
       }
     }
+    ctx.globalAlpha = .2; ctx.fillStyle = cM; ctx.fill(lejos);
+    ctx.globalAlpha = .55; ctx.fillStyle = cA; ctx.fill(cerca);
     ctx.globalAlpha=1;
   }
   requestAnimationFrame(frame);
@@ -1470,6 +1481,8 @@ function histTurnos(){
 }
 function renderHist(){
   if(!$('hist')) return;
+  const clave = [S.histVer||0, vk(), hk(), S.cfg.meta, S.costosVer||0, S.rol].join('|');
+  if(clave === S.histClave) return; S.histClave = clave;
   const dias = histTurnos();
   const meta = S.cfg.meta;
   const refs = (S.cfg.historico||[]).filter(x=>x.unidades>0);
@@ -1553,7 +1566,7 @@ function renderLog(R){
 /* ---------- panel de la tablet ---------- */
 function renderPanel(R){
   const p = $('panel');
-  const maqs = S.cfg.maquinas.length ? S.cfg.maquinas : [{id:'m1',nombre:'Máquina 1'}];
+  const maqs = S.cfg.maquinas.length ? S.cfg.maquinas : nombrarMaq([{id:'m1'}]);
   if(!S.draft.maq || !maqs.find(m=>m.id===S.draft.maq)) S.draft.maq = maqs[0].id;
   if(p.dataset.built !== maqs.map(m=>m.id).join()+'|'+vk()) S.draft.dirty = false;
   const pasado = vk() < hk();
@@ -1649,7 +1662,7 @@ function updCalc(){
   $('pUlt').innerHTML = llevaTxt;
   let msg = '', ok = inc > 0;
   if(vk()<hk() && !horaEnTurno($('pHora')?.value)){ ok = false; msg = `<span class="delta-down">La hora debe estar dentro del turno ${TN(S.viewT)} (${hhmm(T_INI)} – ${hhmm(T_FIN)})</span>`; }
-  else if(inc > 0) msg = `+<b>${fmtCaj(inc)}</b> → quedarían <b>${fmtCaj(ant.total+inc)}</b> en el turno · gas <b>${nf2.format(inc*53.4/1000)}</b> kg · agua <b>${nf2.format(inc*451.725/1000)}</b> kg`;
+  else if(inc > 0) msg = `+<b>${fmtCaj(inc)}</b> → quedarían <b>${fmtCaj(ant.total+inc)}</b> en el turno · gas <b>${nf2.format(inc*MAT.find(x=>x.k==='gas').q/1000)}</b> kg · agua <b>${nf2.format(inc*MAT.find(x=>x.k==='agua').q/1000)}</b> kg`;
   $('pCalc').innerHTML = msg;
   $('pReg').disabled = !ok;
   // botón "Anular último reporte" de la máquina elegida
@@ -1872,14 +1885,14 @@ function subDia(){
 }
 function subHist(){
   S.db.collection('dias').orderBy('fecha','desc').limit(120).onSnapshot(snap=>{
-    S.hist = snap.docs.map(d=>d.data()).filter(d=>d && d.fecha);
+    S.hist = snap.docs.map(d=>d.data()).filter(d=>d && d.fecha); S.histVer = (S.histVer||0)+1;
     if(S.rol==='tv') render(); else renderHist();
   }, ()=>{});
 }
 function subCostos(){
   if(!verRent()) return;
   S.db.doc('costos/planta').onSnapshot(snap=>{
-    S.costos = snap.exists ? snap.data() : {};
+    S.costos = snap.exists ? snap.data() : {}; S.costosVer = (S.costosVer||0)+1;
     fillCostos();
     if(S.user) render();
   }, ()=>{});
@@ -1887,7 +1900,7 @@ function subCostos(){
 function subCfg(){
   S.db.doc('config/planta').onSnapshot(snap=>{
     const c = snap.exists ? snap.data() : {};
-    S.cfg = {maquinas:Array.isArray(c.maquinas)&&c.maquinas.length?c.maquinas:[{id:'m1',nombre:'Máquina 1'}], meta:c.meta??null, historico:Array.isArray(c.historico)?c.historico:[], formula:c.formula||{}};
+    S.cfg = {maquinas:nombrarMaq(Array.isArray(c.maquinas)&&c.maquinas.length?c.maquinas:[{id:'m1'}]), meta:c.meta??null, historico:Array.isArray(c.historico)?c.historico:[], formula:c.formula||{}};
     aplicarFormula(S.cfg.formula);
     if($$('pMeta') && document.activeElement!==$$('pMeta')) $$('pMeta').value = S.cfg.meta ?? '';
     if($$('panel')) $$('panel').dataset.built='';
@@ -1956,7 +1969,7 @@ async function enterApp(user){
   if(d.rol==='tv'){ document.documentElement.classList.add('rol-tv'); delete document.documentElement.dataset.pal; let tt=null; try{ tt=localStorage.getItem('temaTV'); }catch(e){} ponerTemaTV(tt||'claro', false); const mc=$$('materials')?.closest('.card'); if(mc) mc.hidden=true; const hc=$$('histCard'); if(hc) hc.hidden=true; }
   if(S.rol==='admin'){
     const c = await FBX.fsM.getDoc(FBX.fsM.doc(FBX.db,'config','planta')).catch(()=>null);
-    if(c && !c.exists()) await FBX.fsM.setDoc(c.ref,{maquinas:[{id:'m1',nombre:'Máquina automática 1'}], meta:null, historico:[{etiqueta:'Día 1',unidades:12000},{etiqueta:'Día 2',unidades:8000}]}).catch(()=>{});
+    if(c && !c.exists()) await FBX.fsM.setDoc(c.ref,{maquinas:[{id:'m1',nombre:'Máquina automática'},{id:'m2',nombre:'Máquina manual'}], meta:null, historico:[{etiqueta:'Día 1',unidades:12000},{etiqueta:'Día 2',unidades:8000}]}).catch(()=>{});
   }
   const saved = (()=>{ try{ return localStorage.getItem('modo'); }catch(e){ return null; } })();
   mode = S.rol==='jefe' ? 'tablet' : (S.rol==='tv' || S.rol==='gerencia' || S.rol==='contador') ? 'tv' : (saved || 'tv');
