@@ -66,7 +66,8 @@ function resumen(doc, fecha, t, cfg) {
   const T = TURNOS[t];
   const ev = normEvents(evDe(doc, t));
   const pers = doc?.personal?.[t] || {};
-  const maqs = (cfg.maquinas && cfg.maquinas.length) ? cfg.maquinas : [{ id: 'm1', nombre: 'Máquina 1' }];
+  const NOMBRE_MAQ = { m1: 'Máquina automática', m2: 'Máquina manual' };   // iguales a los del tablero
+  const maqs = ((cfg.maquinas && cfg.maquinas.length) ? cfg.maquinas : [{ id: 'm1' }]).map(m => ({ ...m, nombre: NOMBRE_MAQ[m.id] || m.nombre }));
   const M = {};
   for (const m of maqs) M[m.id] = { id: m.id, nombre: m.nombre, und: 0, reportes: 0, fallas: [], downMin: 0, abierta: null, pers: pers[m.id] ?? null };
   const fallas = [];
@@ -179,7 +180,7 @@ function correo(titulo, subtitulo, cuerpo) {
 <table role="presentation" width="680" cellpadding="0" cellspacing="0" style="max-width:680px;width:100%;border-collapse:collapse">
   <tr><td style="background:${C.navy};padding:22px 28px">
     <div style="font-size:22px;letter-spacing:6px;color:#fff">AERO<span style="color:#C9A86F">BOL</span></div>
-    <div style="font-size:12px;color:#B9C6D8;margin-top:2px">Planta Barranquilla · Espuma Torito 1000</div>
+    <div style="font-size:12px;color:#B9C6D8;margin-top:2px">Planta Barranquilla · Espuma Torito</div>
   </td></tr>
   <tr><td style="background:#fff;padding:24px 28px 8px;border-left:1px solid ${C.linea};border-right:1px solid ${C.linea}">
     <div style="font-size:20px;font-weight:bold;color:${C.navy}">${esc(titulo)}</div>
