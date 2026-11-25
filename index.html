@@ -1956,9 +1956,32 @@ async function loadFirebase(){
 const lerr = msg => { const e=$$('lErr'); e.textContent=msg; e.classList.remove('shake'); void e.offsetWidth; e.classList.add('shake'); };
 const busy = on => { const b=$$('lBtn'); b.disabled=on; b.textContent = on ? 'Verificando…' : 'Entrar'; };
 
-async function enterApp(user){
-  const perfil = await FBX.fsM.getDoc(FBX.fsM.doc(FBX.db,'usuarios',user.uid)).catch(()=>null);
-  const d = perfil && perfil.exists() ? perfil.data() : null;
+// Lee el perfil con reintentos: un fallo de red o de arranque de la base no es "sin rol".
+async function leerPerfil(uid){
+  const ref = FBX.fsM.doc(FBX.db,'usuarios',uid);
+  let ultimoError = null;
+  for(const espera of [0, 500, 1200, 2500, 4000]){
+    if(espera) await new Promise(r=>setTimeout(r, espera));
+    try{
+      if(espera) await FBX.auth.currentUser?.getIdToken(true);      // renueva la sesión antes de reintentar
+      const snap = await FBX.fsM.getDoc(ref);
+      if(snap.exists() || !snap.metadata?.fromCache) return {ok:true, d: snap.exists() ? snap.data() : null};
+    }catch(e){ ultimoError = e; }
+  }
+  return {ok:false, error: ultimoError};
+}
+let entrando = null;
+function enterApp(user){                     // una sola entrada a la vez (el inicio de sesión la pedía dos veces)
+  if(!entrando) entrando = entrarApp(user).finally(()=>{ entrando = null; });
+  return entrando;
+}
+async function entrarApp(user){
+  const res = await leerPerfil(user.uid);
+  if(!res.ok){
+    await FBX.authM.signOut(FBX.auth); busy(false);
+    $$('login').hidden=false; lerr('No se pudo verificar el usuario por la conexión. Espera unos segundos y vuelve a intentar.'); return;
+  }
+  const d = res.d;
   if(!d || !['admin','jefe','tv','gerencia','contador'].includes(d.rol)){
     await FBX.authM.signOut(FBX.auth); busy(false);
     $$('login').hidden=false; lerr('Este usuario no tiene rol asignado. Pide al administrador que lo active.'); return;
@@ -2010,7 +2033,7 @@ $$('salir').onclick = async () => { try{ await FBX.authM.signOut(FBX.auth); }cat
   try{
     FBX = await loadFirebase();
     FBX.authM.onAuthStateChanged(FBX.auth, user=>{
-      if(user && !S.user) enterApp(user);
+      if(user && !S.user && !entrando) enterApp(user);
       else if(!user){ $$('login').hidden=false; $$('lUser').focus(); }
     });
   }catch(e){ $$('login').hidden=false; lerr('No se pudo cargar. Revisa la conexión a internet.'); }
