@@ -1,0 +1,51 @@
+# Planta Aerobol · Correo automático con el resumen de cada turno.
+# Horas en UTC (Bogotá = UTC-5): 23:10 UTC = 6:10 p.m. (cierre turno día) · 11:10 UTC = 6:10 a.m. (cierre turno noche)
+name: Reporte de turno por correo
+
+on:
+  schedule:
+    - cron: '10 23 * * *'
+    - cron: '10 11 * * *'
+  workflow_dispatch:
+    inputs:
+      fecha:
+        description: 'Fecha del turno (AAAA-MM-DD). Vacío = el último turno que cerró'
+        required: false
+        default: ''
+      turno:
+        description: 'D = día, N = noche (solo si escribió fecha)'
+        required: false
+        default: ''
+      solo_prueba:
+        description: 'Enviar solo al correo de prueba (REPORTE_PRUEBA)'
+        type: boolean
+        default: true
+
+jobs:
+  enviar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Instalar dependencias
+        run: npm install --no-save --no-audit --no-fund firebase-admin@12
+      - name: Armar y enviar el resumen
+        run: node reporte-turno.mjs
+        env:
+          FIREBASE_SA: ${{ secrets.FIREBASE_SA }}
+          M365_TENANT_ID: ${{ secrets.M365_TENANT_ID }}
+          M365_CLIENT_ID: ${{ secrets.M365_CLIENT_ID }}
+          M365_CLIENT_SECRET: ${{ secrets.M365_CLIENT_SECRET }}
+          REPORTE_DE: ${{ vars.REPORTE_DE }}
+          REPORTE_PARA: ${{ vars.REPORTE_PARA }}
+          REPORTE_CC: ${{ vars.REPORTE_CC }}
+          REPORTE_MODO: ${{ vars.REPORTE_MODO }}
+          REPORTE_PRUEBA: ${{ vars.REPORTE_PRUEBA }}
+          REPORTE_ACTIVO: ${{ vars.REPORTE_ACTIVO }}
+          REPORTE_SI_CERO: ${{ vars.REPORTE_SI_CERO }}
+          FECHA: ${{ github.event.inputs.fecha }}
+          TURNO: ${{ github.event.inputs.turno }}
+          SOLO_PRUEBA: ${{ github.event.inputs.solo_prueba }}
